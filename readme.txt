@@ -1,0 +1,1 @@
+When a module is installed, the path to where the module resides is also defined

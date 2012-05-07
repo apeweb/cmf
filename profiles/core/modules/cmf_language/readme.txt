@@ -1,0 +1,1 @@
+Loads the user language or default language (fallback language) if the user has not selected a language

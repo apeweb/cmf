@@ -1,0 +1,109 @@
+body {
+  background: #ffa500 url(/themes/admin/images/login-background.jpg) no-repeat 0 0;
+  padding: 0;
+  text-align: center;
+  margin: 0;
+  font-family: sans-serif;
+  color: #222;
+}
+
+.column {
+  position: relative;
+  left: 64px;
+  top: 35px;
+  text-align: left;
+}
+
+#content {
+  width: 500px;
+  clear: both;
+  margin: 100px auto 0 auto;
+  border: 1px solid #000;
+  border: 1px solid rgba(0,0,0,0.35);
+  border-radius: 3px;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px rgba(255,255,255,0.3), inset 0 10px 20px rgba(255,255,255,0.25), inset 0 -15px 30px rgba(0,0,0,0.1);
+  -o-box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px rgba(255,255,255,0.3), inset 0 10px 20px rgba(255,255,255,0.25), inset 0 -15px 30px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px rgba(255,255,255,0.3), inset 0 10px 20px rgba(255,255,255,0.25), inset 0 -15px 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px rgba(255,255,255,0.3), inset 0 10px 20px rgba(255,255,255,0.25), inset 0 -15px 30px rgba(0,0,0,0.1);
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 23em;
+  position: relative;
+  top: -60px;
+}
+
+label {
+  float: left;
+  width: 8em;
+  clear: left;
+  margin: 14px 0 4px 0;
+  font-size: 14px;
+}
+
+input {
+  float: left;
+  width: 250px;
+  margin: 10px 0 0 0;
+}
+
+.radio {
+  clear: both;
+  display: block;
+  width: 23em;
+  padding: 0;
+  margin: 0;
+}
+
+.security {
+  margin-bottom: 10px;
+}
+
+.radio input {
+  margin: 4px 8px 0 10px;
+  width: 10px;
+  display: inline;
+}
+
+#submit, form p {
+  clear: left;
+}
+
+#submit {
+  margin-top: 7px;
+  width: 8em;
+  float: right;
+}
+
+.footer {
+  font-size: 12px;
+  clear: left;
+}
+
+.error {
+  border: 1px solid #f00;
+  background: #F7E9E9 url(/themes/admin/images/error-icon.gif) 13px 13px no-repeat;
+  padding: 0 7px 0 42px;
+  font-size: 12px;
+  margin: -7px 10px 17px 10px;
+  text-align: left;
+}
+
+.error ul {
+  padding: 0 0 0 28px;
+  margin-bottom: 0;
+}
+
+.error li {
+  margin-bottom: 10px;
+}
+
+.logo {
+  text-align: center;
+  margin: -80px 0 0 0;
+  padding: 0;
+}
