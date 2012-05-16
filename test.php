@@ -1,5 +1,13 @@
 <?php
 
+$query = new Query;
+$query->select('field', 'alias');
+$query->from('table', 'alias');
+$query->from('table', 'alias');
+
+$query->join('alias', 'alias');
+$query->where('table', 'alias');
+
 echo $_SERVER['PHP_SELF'];
 echo "\r\n";
 exit;
