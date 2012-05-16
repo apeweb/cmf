@@ -75,13 +75,19 @@ class Admin_Authentication_Controller extends Controller {
   }
 
   private static function _handlePostBack () {
+    // xxx need to add to registry as part of default install
+    //Config::setValue(CMF_REGISTRY, 'support', 'company', '');
+
     if (trim(View_Data::getValue('username_control')->text) == '') {
-      Cmf_Flash_Message::setMessage('Please enter the user name for your account. If you are unsure what your user name is please contact Ape Web.', 'error');
+      // xxx need literal translations working for this
+      $message = sprintf('Please enter the user name for your account. If you are unsure what your user name is please contact %s.', Config::getValue('support', 'company'));
+      Cmf_Flash_Message::setMessage($message, 'error');
       return;
     }
 
     if (View_Data::getValue('password_control')->text == '') {
-      Cmf_Flash_Message::setMessage('Please enter the password for your account. If you are unsure what your password is please contact Ape Web.', 'error');
+      $message = sprintf('Please enter the password for your account. If you are unsure what your password is please contact %s.', Config::getValue('support', 'company'));
+      Cmf_Flash_Message::setMessage($message, 'error');
       return;
     }
 

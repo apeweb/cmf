@@ -46,6 +46,6 @@ if (count(debug_backtrace()) == 0) {
         </form>
       </div>
     </div>
-    <p class="footer">Your activity is being monitored and recorded by Ape Web for security purposes.</p>
+    <p class="footer">Your activity is being monitored and recorded for security purposes.</p>
   </body>
 </html>
