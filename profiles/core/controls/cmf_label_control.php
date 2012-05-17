@@ -25,7 +25,10 @@ class Cmf_Label_Control extends Cmf_Html_Element_Control {
         $control->_content .= $control->text;
       }
 
-      // xxx support child controls
+      foreach ($control->children as $child) {
+        $child->process();
+        $control->_content .= $child->getContent();
+      }
 
       $control->_content .= '</label>';
 
