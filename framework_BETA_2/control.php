@@ -20,12 +20,36 @@ abstract class Control {
 
   protected $_processed = FALSE; // Whether the data has been converted into HTML
 
-  protected $_prefix = '';
-  protected $_content = '';
-  protected $_postfix = '';
+  public $_prefix = '';
+  public $_content = '';
+  public $_postfix = '';
 
   protected $_timeRendered = 0; // How many times has the control been rendered
   protected $_timesToRender = 1; // How many times should the control be rendered
+
+  public function setPrefix ($prefix) {
+    $this->_prefix = $prefix;
+  }
+
+  public function getPrefix () {
+    return $this->_prefix;
+  }
+
+  public function setContent ($content) {
+    $this->_content = $content;
+  }
+
+  public function getContent () {
+    return $this->_content;
+  }
+
+  public function setPostfix ($postfix) {
+    $this->_postfix = $postfix;
+  }
+
+  public function getPostfix () {
+    return $this->_postfix;
+  }
 
   public function __toString () {
     if ($this->_timesToRender == $this->_timeRendered) {
