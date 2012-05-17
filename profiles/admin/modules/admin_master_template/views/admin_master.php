@@ -20,7 +20,6 @@ if (count(debug_backtrace()) == 0) {
     <?= View_Data::getValue('header'); ?>
     <?= View_Data::getValue('content'); ?>
     <?= View_Data::getValue('footer'); ?>
-    <?= View_Data::getValue('copyright'); ?>
     <?= View_Data::getValue('body', 'js'); ?>
   </body>
 </html>

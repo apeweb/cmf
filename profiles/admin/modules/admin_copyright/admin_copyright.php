@@ -15,7 +15,13 @@ class Admin_Copyright {
   }
 
   public static function buildCopyrightNotice () {
-    View_Data::setValue('copyright', Config::getValue('admin', 'copyright', 'value'));
+    try {
+      $footer = View_Data::getValue('footer');
+    }
+    catch (Exception $ex) {
+      $footer = '';
+    }
+    View_Data::setValue('footer', $footer . Config::getValue('admin', 'copyright', 'value'));
   }
 }
 
