@@ -14,7 +14,7 @@ class Cmf_Label_Control extends Cmf_Html_Element_Control {
       $control->_content = '<label';
 
       if (trim($control->for) != '') {
-        $control->_content .= ' class="' . $control->for . '"';
+        $control->_content .= ' for="' . $control->for . '"';
       }
 
       $control->_setCommonAttributes();
