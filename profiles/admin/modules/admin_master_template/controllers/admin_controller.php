@@ -53,19 +53,6 @@ class Admin_Controller extends Controller {
     $js->addJs('/profiles/admin/js/admin.js');
     View_Data::setValue('head', 'js', $js);
 
-    // xxx move into block
-    View_Data::setValue('navigation_search', '
-      <table class="search_box" style="width:auto">
-        <tbody>
-          <tr>
-            <td valign="bottom">
-              <label for="search_form" class="print-only">Search:</label> <input type="text" id="search_form" name="search" title="Search for products, users, etc." class="input-text wide title_is_label" /> <input type="image" name="action" value="Search" title="Search" alt="Search" src="/themes/admin/images/search.gif" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    ');
-
     /*
     // xxx view data should be populated by modules
     $form = new Cmf_Form_Control;
