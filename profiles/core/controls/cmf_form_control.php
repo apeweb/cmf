@@ -21,7 +21,7 @@ class Cmf_Form_Control extends Cmf_Control {
       $control->_content .= ' class="' . $control->cssClass . '"';
     }
     if ($control->id != '') {
-      $control->_content .= ' class="' . $control->id . '"';
+      $control->_content .= ' id="' . $control->id . '"';
     }
     $control->_content .= ">";
 
