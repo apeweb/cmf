@@ -16,13 +16,28 @@ class Cmf_Form_Control extends Cmf_Control {
     $control->_content .= ' method="' . $control->method . '"';
     $control->_content .= ' action="' . $control->action . '"';
 
-    // Optional
-    if ($control->cssClass != '') {
+    // core attibutes
+    if (trim($control->cssClass) != '') {
       $control->_content .= ' class="' . $control->cssClass . '"';
     }
-    if ($control->id != '') {
+    if (trim($control->id) != '') {
       $control->_content .= ' id="' . $control->id . '"';
     }
+    if (trim($control->style) != '') {
+      $control->_content .= ' style="' . $control->style . '"';
+    }
+    if (trim($control->toolTip) != '') {
+      $control->_content .= ' title="' . $control->toolTip . '"';
+    }
+
+    // i18n attributes
+    if (trim($control->lang) != '') {
+      $control->_content .= ' lang="' . $control->lang . '" xml:lang="' . $control->lang . '"';
+    }
+    if (trim($control->direction) != '') {
+      $control->_content .= ' dir="' . $control->direction . '"';
+    }
+
     $control->_content .= ">";
 
     // Children
