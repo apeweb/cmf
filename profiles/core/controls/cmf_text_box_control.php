@@ -7,7 +7,7 @@ if (count(debug_backtrace()) == 0) {
 
 class Cmf_Text_Box_Control extends Cmf_Html_Element_Control {
   public $name = NULL; // input name
-  public $text = NULL; // input value
+  private $_text = NULL; // input value
   public $textMode = 'singleLine'; // this renderer supports singleLine, multiLine and password
 
   public $readOnly = FALSE;
@@ -24,6 +24,28 @@ class Cmf_Text_Box_Control extends Cmf_Html_Element_Control {
   
   public $renderDefaultValueOnly = FALSE;
   public $defaultValue = NULL;
+
+  public function __set ($variableName, $value) {
+    if ($variableName == 'text') {
+      $this->_text = $value;
+    }
+    else {
+      $this->$variableName = $value;
+    }
+  }
+
+  public function __get ($variableName) {
+    switch ($variableName) {
+      // data value
+      case 'text':
+        $this->_collectPostBackData();
+        return $this->{'_' . $variableName};
+
+      default:
+        // legacy error reporting
+        trigger_error("Undefined variable: '" . $variableName . "()'", E_USER_NOTICE);
+    }
+  }
 
   static public function render (Cmf_Text_Box_Control $control) {
     if ($control->enabled == TRUE) {
