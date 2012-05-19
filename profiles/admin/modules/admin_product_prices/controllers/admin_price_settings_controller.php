@@ -9,17 +9,17 @@ class Admin_Price_Settings_Controller extends Controller {
   // manage price labels
   public static function priceLabels () {
     Admin_Controller::shared();
-      $content = new Cmf_Template_Control;
-      $content->templatePath = dirname(__DIR__) . '/views/admin_price_labels' . PHP_EXT;
-      View_Data::setValue('content', $content);
+    $content = new Cmf_Template_Control;
+    $content->templatePath = dirname(__DIR__) . '/views/admin_price_labels' . PHP_EXT;
+    View_Data::setValue('content', $content);
   }
 
   // manage price validity
   public static function priceValidityConditions () {
     Admin_Controller::shared();
-      $content = new Cmf_Template_Control;
-      $content->templatePath = dirname(__DIR__) . '/views/admin_price_validity' . PHP_EXT;
-      View_Data::setValue('content', $content);
+    $content = new Cmf_Template_Control;
+    $content->templatePath = dirname(__DIR__) . '/views/admin_price_validity' . PHP_EXT;
+    View_Data::setValue('content', $content);
   }
 }
 
