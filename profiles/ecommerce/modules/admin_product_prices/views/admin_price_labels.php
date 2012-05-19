@@ -73,7 +73,7 @@ if (count(debug_backtrace()) == 0) {
     </table>
 
     <fieldset>
-      <table class="data order_rows data resizable sortable last" border="1">
+      <table class="data order_rows resizable sortable last" border="1">
         <thead>
           <tr>
             <th width="13" class="checkcolumn not_sortable">
