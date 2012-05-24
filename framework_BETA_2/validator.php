@@ -61,6 +61,15 @@ class Validator {
   static public function isValidEmailAddress ($subject) {
     return (bool) filter_var($subject, FILTER_VALIDATE_EMAIL);
   }
+
+  static public function isValidPhpIdentifier ($subject) {
+    if (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/', $subject) == TRUE) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
 }
 
 ?>
