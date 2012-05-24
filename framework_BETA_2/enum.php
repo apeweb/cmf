@@ -7,7 +7,6 @@ if (count(debug_backtrace()) == 0) {
 
 abstract class Enum {
   private function __construct(){}
-  private function __clone(){}
 
   public static function getValues ($class) {
     $reflector = new ReflectionClass($class);
