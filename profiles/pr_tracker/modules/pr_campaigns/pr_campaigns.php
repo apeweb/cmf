@@ -5,7 +5,7 @@ if (count(debug_backtrace()) == 0) {
   die("The page cannot be displayed.\r\nThe request has not been fulfilled because the server does not authorise access to this request externally.");
 }
 
-class Pr_Campaigns extends Cmf_Model {
+class Pr_Campaigns extends Cmf_List {
   const Prepared_Statement_Library = 'pr_campaigns_prepared_statement_library';
 
   public static function getAllCampaigns ($active = 1, $deleted = 0) {
@@ -18,14 +18,6 @@ class Pr_Campaigns extends Cmf_Model {
     $campaigns = $query->fetchAll();
 
     return $campaigns;
-  }
-
-  public static function getCampaign ($id) {
-
-  }
-
-  public static function campaignExists ($id) {
-
   }
 }
 
