@@ -15,6 +15,13 @@ class Cmf_Database_Prepared_Statement_Library_Mysql {
       AND s_id = :s_id
   ";
 
+  const CMF_REGISTRY_SITE_ID_CHECK = "
+    SELECT COUNT(*) AS installed
+      FROM cmf_registry
+      WHERE s_id = :s_id
+      LIMIT 1
+  ";
+
   const CMF_REGISTRY_KEY_GET_ID = "
     SELECT r_id
       FROM cmf_registry

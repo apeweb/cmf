@@ -6,8 +6,11 @@ if (count(debug_backtrace()) == 0) {
 }
 
 abstract class Cmf_Module implements iCmf_Module {
+  // Stores the required MVC routes and registry settings
   static public function install(){}
+  // Remove stored routes and registry settings
   static public function uninstall(){}
+  // Set what events to listen on, and what callbacks to use
   static public function initialise(){}
 }
 

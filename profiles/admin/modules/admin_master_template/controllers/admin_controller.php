@@ -20,11 +20,11 @@ class Admin_Controller extends Controller {
     $header->templatePath = Cmf_Module_Cache::getModulePath('admin_master_template') . 'views/admin_header' . PHP_EXT;
     View_Data::setValue('header', $header);
 
-    // xxx move into block
+    // xxx move into a block/module
     $footer = '<div id="footer"><hr /></div>';
     View_Data::setValue('footer', $footer);
 
-    // xxx move into block
+    // xxx move into a block/module
     $sessionInformation = '<p>You are logged in as &quot;' . Session::getValue('admin_username') . '&quot; and have no unread messages.</p>';
     View_Data::setValue('session_information', $sessionInformation);
 
@@ -51,17 +51,21 @@ class Admin_Controller extends Controller {
     $js->addJs('/misc/scripts/jquery.tablesorter.js');
     $js->addJs('/misc/scripts/jquery.form.js');
     $js->addJs('/profiles/admin/js/admin.js');
+
+    $js->addJs('http://chelmsford_cms/misc/jquery.once.js');
+    $js->addJs('http://chelmsford_cms/profiles/openpublic/modules/contrib/jquery_update/replace/ui/ui/minified/jquery.ui.droppable.min.js');
+    $js->addJs('/misc/scripts/jquery.tabledrag.js');
+
     View_Data::setValue('head', 'js', $js);
 
     /*
     // xxx view data should be populated by modules
     $form = new Cmf_Form_Control;
     $form->id = 'test';
-    //$form->children['username'] = new Cmf_Input_Control;
 
     // xxx example of how to add a child element
-    $region = new Cmf_Region_Control;
-    $region->children['form'] = $form;
+    $block = new Cmf_Block_Control;
+    $block->children['form'] = $form;
 
     // xxx adding regions to views
     View_Data::setValue('main_content', $region);

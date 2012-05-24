@@ -159,6 +159,14 @@ class Cmf_Registry_Database_Driver extends Config_Array_Driver {
    * Loads all settings from the detault data source registry
    */
   public function load ($options = array()) {
+    $query = Cmf_Database::call('cmf_registry_site_id_check');
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
+    $query->execute();
+
+    if ($query->fetchColumn() == FALSE) {
+      throw new RuntimeException("Invalid site id '" . Config::getValue('site', 'id') . "' specified in site configuration file");
+    }
+
     // if a time comes where we need to load each setting by the root key this design makes it
     // possible to load an entire root key without loading all root keys meaning that only 1 row
     // has to be returned for the module, etc. using the key

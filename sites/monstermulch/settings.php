@@ -35,7 +35,7 @@ $settings = array(
      * each website has a unique value, valid values range from 1 to 9, by default the value
      * used here and in the database is 1
      */
-    'id' => 2,
+    'id' => 1,
 
     /**
      * Site security settings

@@ -6,6 +6,6 @@ if (count(debug_backtrace()) == 0) {
 }
 
 ?>
-<div id="main_content">
+<div id="main_content" class="clearfix">
   <h1>Dashboard</h1>
 </div>

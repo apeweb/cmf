@@ -58,3 +58,9 @@ Naming Conventions
 * URL's should use dashes opposed to underscores or camel-cased naming, all
   words should be lowercase
 * All filenames should use underscores to separate words
+
+
+Conventions Coming Soon
+=======================
+
+* Standardised URL patterns such as whether to use /user/edit/1 or /user/1/edit

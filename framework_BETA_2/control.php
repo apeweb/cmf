@@ -5,6 +5,7 @@ if (count(debug_backtrace()) == 0) {
   die("The page cannot be displayed.\r\nThe request has not been fulfilled because the server does not authorise access to this request externally.");
 }
 
+// xxx remove id and cssClass from control and move them to a Html_Element_Control as they no longer belong here
 abstract class Control {
   public $id = ''; // The id of the control
   public $cssClass = ''; // The CSS classes that apply to this control

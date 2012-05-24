@@ -13,9 +13,9 @@ if (count(debug_backtrace()) == 0) {
     <?= View_Data::getValue('logo'); ?>
   </div>
 
-  <div class="text_links">
-    <div class="menu_text">
-      <?= View_Data::getValue('text_links'); ?>
+  <div class="system_information">
+    <div class="system_links">
+      <?= View_Data::getValue('system_links'); ?>
     </div>
     <div class="session_information">
       <?= View_Data::getValue('session_information'); ?>

@@ -5,6 +5,7 @@ if (count(debug_backtrace()) == 0) {
   die("The page cannot be displayed.\r\nThe request has not been fulfilled because the server does not authorise access to this request externally.");
 }
 
+// xxx replace with http://code.google.com/p/parsecsv-for-php/
 class Csv {
 	static protected function _arrayToCsvLine ($data, $delimiter = ',', $enclosure = '"', $escape = '"') {
 		$fields = array();

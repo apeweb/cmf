@@ -6,6 +6,6 @@ if (count(debug_backtrace()) == 0) {
 }
 
 ?>
-<div id="main_content">
+<div id="main_content" class="clearfix">
   <?= View_Data::getValue('main_content'); ?>
 </div>
