@@ -10,8 +10,7 @@ class DOM_XPath_Expression {
   private $_variables = array();
 
   public function bind ($name, $value) {
-    // xxx move this regex out of here
-    if (preg_match('#^\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$#', $name) == FALSE) {
+    if (substr($name, 0, 1) != '$' || Validator::isValidPhpIdentifier(substr($name, 1)) == FALSE) {
       throw new DOM_XPath_Exception("Illegal characters in variable name");
     }
 
