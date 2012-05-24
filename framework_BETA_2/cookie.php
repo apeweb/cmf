@@ -15,8 +15,6 @@ class Cookie {
   private $_httpOnly = FALSE;
 
   public function __toString () {
-    $cookieString = '';
-
     $cookieString = 'Set-Cookie: ' . rawurlencode($this->_name) . '=' . rawurlencode($this->_value);
 
     if ($this->_expire != 0) {
