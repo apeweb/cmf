@@ -32,6 +32,7 @@ class Cmf_Menu_Prepared_Statement_Library_Mysql {
       WHERE mn_id = :mn_id
       AND mnl_deleted = '0'
       AND s_id = :s_id
+      ORDER BY mnl_weight ASC
   ";
 }
 
