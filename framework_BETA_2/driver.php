@@ -10,7 +10,8 @@ abstract class Driver implements iDriver {
   protected $_options = array();
 
   public function setName ($name) {
-    // xxx assert
+    Assert::isString($name);
+
     $this->_name = $name;
   }
 
@@ -20,7 +21,8 @@ abstract class Driver implements iDriver {
 
   // $driver->setOption('bindArgumentToParameter', array(array('argument' => 0, 'name' => '$id')));
   public function setOption($name, $value, $merge = FALSE) {
-    // xxx assert
+    Assert::isString($name);
+    Assert::isBoolean($merge);
 
     if ($merge == FALSE) {
       $this->_options[$name] = $value;
@@ -31,7 +33,7 @@ abstract class Driver implements iDriver {
   }
 
   public function getOption ($name) {
-    // xxx assert
+    Assert::isString($name);
 
     if (array_key_exists($name, $this->_options) == TRUE) {
       return $this->_options[$name];
