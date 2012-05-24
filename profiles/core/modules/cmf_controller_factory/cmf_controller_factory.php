@@ -17,10 +17,7 @@ class Cmf_Controller_Factory implements iController_Factory {
   // tell the controller builder that this factory should be used to create instances of controllers
   public static function initialise () {
     $instance = new Cmf_Controller_Factory;
-    Controller_Builder::setControllerFactory($instance);
-
-    // xxx this isn't the best thing to do, as if we change the controller factory, this class will still try to load a controller
-    spl_autoload_register(array($instance, 'loadController'));
+    Controller_Builder::setControllerFactory($instance, TRUE);
   }
 
   // checks to see if the controller and action are valid before passing them off to the _activateController method

@@ -8,8 +8,16 @@ if (count(debug_backtrace()) == 0) {
 class Controller_Builder {
   private static $_controllerFactory = '';
 
-  static public function setControllerFactory (iController_Factory $controllerFactory) {
+  static public function setControllerFactory (iController_Factory $controllerFactory, $autoload = FALSE) {
+    if ($autoload == TRUE) {
+      spl_autoload_unregister(array(self::$_controllerFactory, 'loadController'));
+    }
+
     self::$_controllerFactory = $controllerFactory;
+
+    if ($autoload == TRUE) {
+      spl_autoload_register(array(self::$_controllerFactory, 'loadController'));
+    }
   }
 
   static public function getControllerFactory () {
