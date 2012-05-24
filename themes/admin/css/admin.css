@@ -305,7 +305,7 @@ input.mini {
   overflow: hidden;
 }
 
-.header .text_links {
+.header .system_information {
   float: right;
   display: inline;
   overflow: hidden;
@@ -314,7 +314,7 @@ input.mini {
   text-align: right;
 }
 
-.header .text_links a {
+.header .system_information a {
   margin: 0 2px 0 4px;
   padding: 4px 6px;
 }
@@ -729,7 +729,7 @@ p .dragHandle {
   color: #000;
 }
 
-.navigation_bar .hover {
+.navigation_bar .level_0 {
   position: relative;
   background: url(/themes/admin/images/menu/mnu-middle.gif);
   padding: 7px 7px 6px 7px;
@@ -740,50 +740,54 @@ p .dragHandle {
   border-top-right-radius: 6px;
 }
 
-.navigation_bar .hover a {
+.navigation_bar .level_0.hover a {
   background: url(/themes/admin/images/menu/mnu-arrow.gif) no-repeat right center;
   padding-right: 12px;
 }
 
-.navigation_bar .hover.active-trail {
+.navigation_bar .level_0.active-trail {
   /** xxx do something to make tab stand out **/
 }
 
-.navigation_bar .hover.active-trail ul li a {
+.navigation_bar .level_0.active-trail ul li a {
   font-weight: normal;
   color: #000;
 }
 
-.navigation_bar .hover span {
+.navigation_bar .level_0 span {
   padding-left: 21px;
   background: no-repeat left center;
 }
 
-.navigation_bar .hover span.folder_table {
+.navigation_bar .level_0 span.folder_table {
   background-image: url(/themes/admin/images/mini-icons/folder-table.png);
 }
 
-.navigation_bar .hover span.package {
+.navigation_bar .level_0 span.package {
   background-image: url(/themes/admin/images/mini-icons/package.png);
 }
 
-.navigation_bar .hover span.creditcards {
+.navigation_bar .level_0 span.creditcards {
   background-image: url(/themes/admin/images/mini-icons/creditcards.png);
 }
 
-.navigation_bar .hover span.group {
+.navigation_bar .level_0 span.group {
   background-image: url(/themes/admin/images/mini-icons/group.png);
 }
 
-.navigation_bar .hover span.layout {
+.navigation_bar .level_0 span.layout {
   background-image: url(/themes/admin/images/mini-icons/layout.png);
 }
 
-.navigation_bar .hover span.chart_pie {
+.navigation_bar .level_0 span.chart_pie {
   background-image: url(/themes/admin/images/mini-icons/chart-pie.png);
 }
 
-.navigation_bar .hover ul {
+.navigation_bar .level_0 ul span {
+  background: none !important;
+}
+
+.navigation_bar .level_0 ul {
   display: none;
 }
 
@@ -810,7 +814,9 @@ p .dragHandle {
 }
 
 .navigation_bar .hovering ul a {
-    background: #fff no-repeat 5px 7px;
+    background-color: #fff !important;
+    background-repeat: no-repeat !important;
+    background-position: 5px 7px !important;
     color: #000;
     display: block;
     font-size: 11px;
@@ -818,17 +824,22 @@ p .dragHandle {
     width: 210px;
 }
 
+.navigation_bar .level_0.hover li a {
+  background: none;
+}
+
 .navigation_bar .hovering ul a br, .break br {
   display: none;
 }
 
-.navigation_bar .hovering ul a strong, .navigation_bar .hovering ul a span {
+.navigation_bar .hovering ul a span {
   display: block;
   padding: 0;
 }
 
-.navigation_bar .hovering ul a strong {
+.navigation_bar .hovering ul a span.first {
   text-decoration: underline;
+  font-weight: bold;
 }
 
 .navigation_bar .hovering ul a:hover {
@@ -969,4 +980,44 @@ p .dragHandle {
 
 .progress.active .bar {
     -moz-animation: 2s linear 0s normal none infinite progress-bar-stripes;
+}
+
+/**
+ * Table drag and drop.
+ */
+.draggable a.tabledrag-handle {
+  cursor: move;
+  float: left;
+  margin-right: 10px;
+  text-decoration: none;
+}
+
+a.tabledrag-handle:hover {
+  text-decoration: none;
+}
+
+a.tabledrag-handle .handle {
+  height:20px;
+  width:20px;
+  background:url(/themes/admin/images/draggable.png) 0px 0px no-repeat;
+}
+
+a.tabledrag-handle-hover .handle {
+  background-position: 0px -20px;
+}
+
+div.indentation, span.indentation {
+  width:20px;
+  height:20px;
+  float:left; /* LTR */
+}
+
+div.tree-child {
+  background: url(/themes/admin/images/tree.png) no-repeat 10px 50%;
+}
+div.tree-child-last {
+  background: url(/themes/admin/images/tree-bottom.png) no-repeat 10px 50%;
+}
+div.tree-child-horizontal {
+  background: url(/themes/admin/images/tree.png) no-repeat -10px 50%;
 }
