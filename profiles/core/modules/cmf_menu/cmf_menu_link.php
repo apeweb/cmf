@@ -21,6 +21,7 @@ class Cmf_Menu_Link {
   public function __construct ($menuLinkProperties = array()) {
     Assert::isArray($menuLinkProperties);
 
+    // xxx should you be able to set the ID?
     if (isset($menuLinkProperties['id']) == TRUE) {
       Assert::isInteger($menuLinkProperties['id']);
 
@@ -200,6 +201,7 @@ class Cmf_Menu_Link {
     $query->execute();
   }
 
+  // xxx shouldn't assume changes should be saved
   protected function _commitChanges () {
     $query = Cmf_Database::call('cmf_menu_link_update', self::Prepared_Statement_Library);
     $query->bindValue(':mnl_parent_id', $this->_parentId);
