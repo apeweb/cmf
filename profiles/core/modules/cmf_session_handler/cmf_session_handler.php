@@ -8,8 +8,9 @@ if (count(debug_backtrace()) == 0) {
 class Cmf_Session_Handler implements iSession_Handler {
   static private $_sessionName = '';
 
-  static private $_token = NULL;
-  static private $_uuid = NULL;
+  // together the following make up the session ID
+  static private $_token = NULL; // non-guessable
+  static private $_uuid = NULL; // guessable
 
   static private $_store = array();
 
@@ -74,9 +75,9 @@ class Cmf_Session_Handler implements iSession_Handler {
     // get the token from the cookie if one exists
     $cookies = self::_getCookies();
 
-    // see if we can get the session data based on the cookie token
+    // see if we can get the session data based on the cookie data provided by the visitor
     try {
-      self::$_store = self::getSessionData($cookies);
+      self::$_store = self::getSessionData($cookies['token'], $cookies['uuid']);
     }
     catch (Exception $ex) {
       self::$_store = array();
@@ -131,41 +132,33 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   private static function _getCookies () {
-    $id = array();
+    $cookies = array(
+      'token' => '',
+      'uuid' => ''
+    );
 
     if (Request::cookieExists(self::$_sessionName . '_token') == TRUE) {
       $cookie = Request::getCookie(self::$_sessionName . '_token');
-      $id['token'] = strval($cookie->getValue());
+      $cookies['token'] = strval($cookie->getValue());
     }
 
     if (Request::cookieExists(self::$_sessionName . '_uuid') == TRUE) {
       $cookie = Request::getCookie(self::$_sessionName . '_uuid');
-      $id['uuid'] = strval($cookie->getValue());
+      $cookies['uuid'] = strval($cookie->getValue());
     }
 
-    if (count($id) != 2) {
-      return array();
-    }
-
-    return $id;
+    return $cookies;
   }
 
   // Get the session data for a user based on the session token, because session data is read only to outside classes
   // (to avoid session session poisoning) there is no setSessionData method
-  public static function getSessionData ($id) {
-    Assert::isArray($id);
-
-    if (isset($id['token']) == FALSE) {
-      throw new Argument_Exception("Missing key 'token' in \$id parameter");
-    }
-
-    if (isset($id['uuid']) == FALSE) {
-      throw new Argument_Exception("Missing key 'token' in \$id parameter");
-    }
+  public static function getSessionData ($token, $uuid) {
+    Assert::isString($token);
+    Assert::isString($uuid);
 
     $query = Cmf_Database::call('cmf_session_get_data', self::Prepared_Statement_Library);
-    $query->bindValue(':session_token', $id['token']);
-    $query->bindValue(':session_uuid', $id['uuid']);
+    $query->bindValue(':session_token', $token);
+    $query->bindValue(':session_uuid', $uuid);
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
 
