@@ -19,10 +19,8 @@ class Cmf_Session_Handler implements iSession_Handler {
 
   public static function install () {
     Config::setValue(CMF_REGISTRY, 'session', 'autostart', 1);
-    Config::setValue(CMF_REGISTRY, 'session', 'name', 'sid' . '_' . php_uname('n'));
-    Config::setValue(CMF_REGISTRY, 'session', 'token_regenerate_hits', 5); // Every 5 hits
-    Config::setValue(CMF_REGISTRY, 'session', 'token_regenerate_time', 60*5); // Every 5 minutes
-    Config::setValue(CMF_REGISTRY, 'session', 'expiration', 60*60*24*7); // 1 week
+    Config::setValue(CMF_REGISTRY, 'session', 'name', 'sid');
+    Config::setValue(CMF_REGISTRY, 'session', 'expiration', 604800); // 1 week
     Config::setValue(CMF_REGISTRY, 'session', 'cookie_domain', ''); // no host (automatically work out)
   }
 
@@ -83,16 +81,15 @@ class Cmf_Session_Handler implements iSession_Handler {
 
       self::_incrementCounter();
 
-      // Work out whether we should be regenerating the token or not
-      if (self::$_store['token_regeneration'] < self::$_time || self::$_store['total_requests'] % Config::getValue('session', 'token_regenerate_hits') == 0) {
-        // xxx bug with not being able to lock sessions means we can't regenerate tokens
-        // the bug:
-        // the browser makes 3 requests at the same time
-        // the first request regenerates the token from A1 to B2
-        // the second request looks for A1 which doesn't exist anymore as it is now B2, and since it can't find A1 it creates a new session C3
-        // the third comes along, and does the same as the second
-        //self::regenerateToken();
-      }
+      // xxx bug with not being able to lock sessions means we can't regenerate tokens
+      /**
+       * the bug:
+       * the browser makes 3 requests at the same time
+       * the first request regenerates the token from A1 to B2
+       * the second request looks for A1 which doesn't exist anymore as it is now B2, and since it can't find A1 it creates a new session C3
+       * the third comes along, and does the same as the second
+       */
+      //self::regenerateToken();
 
       // should the session be remembered?
       self::$_keepAlive = self::$_store['keep_alive'];
@@ -161,10 +158,10 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
   
   private static function _incrementCounter () {
-    // count how many pages have been viewed so far, used later for regenerating the session
+    // count how many pages have been viewed so far
     ++self::$_store['total_requests'];
 
-    // make sure we don't cause an integer overflow
+    // make sure we don't cause an integer overflow, as the value isn't important we are ok setting the value back to 0
     if (self::$_store['total_requests'] == PHP_INT_MAX) {
       self::$_store['total_requests'] = 0;
     }
@@ -177,7 +174,6 @@ class Cmf_Session_Handler implements iSession_Handler {
     // Set the default store values
     self::$_store['total_requests'] = 1; // counts the number of requests made
     self::$_store['user_agent'] = Request::userAgent();
-    self::$_store['token_regeneration'] = self::$_time + Config::getValue('session', 'token_regenerate_time');
     self::$_store['keep_alive'] = FALSE; // By default the session ends when the browser closes
 
     // create the session
@@ -270,7 +266,6 @@ class Cmf_Session_Handler implements iSession_Handler {
 
     if ($query->execute() == TRUE) {
       self::$_token = $new_token;
-      self::$_store['token_regeneration'] = self::$_time + Config::getValue('session', 'token_regenerate_time');
     }
     else {
       self::close();
