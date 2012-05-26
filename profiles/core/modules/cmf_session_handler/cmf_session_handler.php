@@ -5,8 +5,6 @@ if (count(debug_backtrace()) == 0) {
   die("The page cannot be displayed.\r\nThe request has not been fulfilled because the server does not authorise access to this request externally.");
 }
 
-// xxx add support for s_id
-
 class Cmf_Session_Handler implements iSession_Handler {
   static private $_sessionName = '';
   static private $_token = NULL;
@@ -143,6 +141,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
     $query = Cmf_Database::call('cmf_session_get_data', self::Prepared_Statement_Library);
     $query->bindValue(':session_token', $token);
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
 
     $sessionData = strval($query->fetchColumn());
@@ -185,6 +184,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     $query = Cmf_Database::call('cmf_session_insert', self::Prepared_Statement_Library);
     $query->bindValue(':session_expires', self::_getExpires());
     $query->bindValue(':session_token', self::$_token);
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $sessionCreated = $query->execute();
 
     if ($sessionCreated == FALSE) {
@@ -234,6 +234,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
       $query = Cmf_Database::call('cmf_session_get_token_count', self::Prepared_Statement_Library);
       $query->bindValue(':session_token', $token);
+      $query->bindValue(':s_id', Config::getValue('site', 'id'));
       $query->execute();
     }
     while ($query->fetchColumn(0) > 0);
@@ -265,6 +266,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     $query = Cmf_Database::call('cmf_session_update_token', self::Prepared_Statement_Library);
     $query->bindValue(':old_session_token', $old_token);
     $query->bindValue(':new_session_token', $new_token);
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
 
     if ($query->execute() == TRUE) {
       self::$_token = $new_token;
@@ -290,6 +292,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
     $query = Cmf_Database::call('cmf_session_delete', self::Prepared_Statement_Library);
     $query->bindValue(':session_token', self::$_token);
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
 
     self::close();
@@ -376,12 +379,14 @@ class Cmf_Session_Handler implements iSession_Handler {
     $query->bindValue(':session_token', self::$_token);
     $query->bindValue(':session_expires', self::_getExpires());
     $query->bindValue(':session_data', base64_encode(serialize(self::$_store)));
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
   }
 
   public static function purge () {
     $query = Cmf_Database::call('cmf_session_purge', self::Prepared_Statement_Library);
     $query->bindValue(':now', self::$_time);
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
   }
 
