@@ -92,8 +92,6 @@ class Cmf_Session_Handler implements iSession_Handler {
       // check to see if the session has been hijacked or not
       self::_checkForHijackedSession();
 
-      self::_incrementCounter();
-
       // xxx bug with not being able to lock sessions means we can't regenerate the token
       /**
        * the bug:
@@ -177,16 +175,6 @@ class Cmf_Session_Handler implements iSession_Handler {
       self::_create();
     }
   }
-  
-  private static function _incrementCounter () {
-    // count how many pages have been viewed so far
-    ++self::$_store['total_requests'];
-
-    // make sure we don't cause an integer overflow, as the value isn't important we are ok setting the value back to 0
-    if (self::$_store['total_requests'] == PHP_INT_MAX) {
-      self::$_store['total_requests'] = 0;
-    }
-  }
 
   private static function _create () {
     $id = self::_generateSessionId();
@@ -196,7 +184,6 @@ class Cmf_Session_Handler implements iSession_Handler {
     self::$_store = array(); // Make sure nothing has tampered with the store
 
     // Set the default store values
-    self::$_store['total_requests'] = 1; // counts the number of requests made
     self::$_store['user_agent'] = Request::userAgent();
     self::$_store['keep_alive'] = FALSE; // By default the session ends when the browser closes
   }
