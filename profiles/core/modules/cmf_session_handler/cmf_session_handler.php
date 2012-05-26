@@ -199,11 +199,17 @@ class Cmf_Session_Handler implements iSession_Handler {
     $cookie->setValue(self::$_token);
     $cookie->setHttpOnly(TRUE);
 
-    if (Config::hasValue('session', 'cookie_domain') == TRUE && Config::getValue('session', 'cookie_domain') != '') {
-      $cookie->setDomain(Config::getValue('session', 'cookie_domain'));
-    }
-    else {
-      $cookie->setDomain(Config::getValue('session', Request::host()));
+    /**
+     * To make the cookie domain automatically generate, the config setting 'session' -> 'cookie_domain' must be set and
+     * set to blank, if the value is not set at all then no domain will be passed in the cookie header
+     */
+    if (Config::hasValue('session', 'cookie_domain')) {
+      if (Config::getValue('session', 'cookie_domain') != '') {
+        $cookie->setDomain(Config::getValue('session', 'cookie_domain'));
+      }
+      else {
+        $cookie->setDomain(Config::getValue('session', Request::host()));
+      }
     }
 
     if (self::$_keepAlive == TRUE) {
