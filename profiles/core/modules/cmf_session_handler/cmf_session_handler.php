@@ -25,7 +25,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     Config::setValue(CMF_REGISTRY, 'session', 'token_regenerate_hits', 5); // Every 5 hits
     Config::setValue(CMF_REGISTRY, 'session', 'token_regenerate_time', 60*5); // Every 5 minutes
     Config::setValue(CMF_REGISTRY, 'session', 'expiration', 60*60*24*7); // 1 week
-    Config::setValue(CMF_REGISTRY, 'session', 'cookie_domain', Request::host());
+    Config::setValue(CMF_REGISTRY, 'session', 'cookie_domain', ''); // no host (automatically work out)
   }
 
   public static function initialise () {
@@ -199,8 +199,11 @@ class Cmf_Session_Handler implements iSession_Handler {
     $cookie->setValue(self::$_token);
     $cookie->setHttpOnly(TRUE);
 
-    if (Config::hasValue('session', 'cookie_domain') == TRUE) {
+    if (Config::hasValue('session', 'cookie_domain') == TRUE && Config::getValue('session', 'cookie_domain') != '') {
       $cookie->setDomain(Config::getValue('session', 'cookie_domain'));
+    }
+    else {
+      $cookie->setDomain(Config::getValue('session', Request::host()));
     }
 
     if (self::$_keepAlive == TRUE) {
