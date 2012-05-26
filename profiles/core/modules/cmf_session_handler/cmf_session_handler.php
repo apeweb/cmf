@@ -22,6 +22,11 @@ class Cmf_Session_Handler implements iSession_Handler {
 
   static private $_initialised = FALSE;
 
+  // cookie name settings
+  static private $_securePrefix = 'secure_';
+  static private $_tokenPostfix = '_token';
+  static private $_uuidPostfix = '_uuid';
+
   const Prepared_Statement_Library = 'cmf_session_handler_prepared_statement_library';
 
   public static function install () {
@@ -47,7 +52,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
     // For secure cookies use a different name
     if (Request::isSecure() == TRUE) {
-      self::$_sessionName = 'secure_' . self::$_sessionName;
+      self::$_sessionName = self::$_securePrefix . self::$_sessionName;
     }
   }
 
@@ -80,7 +85,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
     // if the session exists it will have values set by the session handler
     if (count(self::$_store) > 0) {
-      // if a session exists make sure we set the token for internal use
+      // if a session exists make sure we set the token and UUID for internal use
       self::$_token = $cookies['token'];
       self::$_uuid = $cookies['uuid'];
 
@@ -89,7 +94,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
       self::_incrementCounter();
 
-      // xxx bug with not being able to lock sessions means we can't regenerate tokens
+      // xxx bug with not being able to lock sessions means we can't regenerate the token
       /**
        * the bug:
        * the browser makes 3 requests at the same time
@@ -132,13 +137,13 @@ class Cmf_Session_Handler implements iSession_Handler {
       'uuid' => ''
     );
 
-    if (Request::cookieExists(self::$_sessionName . '_token') == TRUE) {
-      $cookie = Request::getCookie(self::$_sessionName . '_token');
+    if (Request::cookieExists(self::$_sessionName . self::$_tokenPostfix) == TRUE) {
+      $cookie = Request::getCookie(self::$_sessionName . self::$_tokenPostfix);
       $cookies['token'] = strval($cookie->getValue());
     }
 
-    if (Request::cookieExists(self::$_sessionName . '_uuid') == TRUE) {
-      $cookie = Request::getCookie(self::$_sessionName . '_uuid');
+    if (Request::cookieExists(self::$_sessionName . self::$_uuidPostfix) == TRUE) {
+      $cookie = Request::getCookie(self::$_sessionName . self::$_uuidPostfix);
       $cookies['uuid'] = strval($cookie->getValue());
     }
 
@@ -209,8 +214,8 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   private static function _setCookies () {
-    self::_setCookie(self::$_sessionName . '_token', self::$_token);
-    self::_setCookie(self::$_sessionName . '_uuid', self::$_uuid);
+    self::_setCookie(self::$_sessionName . self::$_tokenPostfix, self::$_token);
+    self::_setCookie(self::$_sessionName . self::$_uuidPostfix, self::$_uuid);
   }
 
   private static function _setCookie ($name, $value) {
@@ -244,12 +249,12 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   private static function _removeCookies () {
-    if (Request::cookieExists(self::$_sessionName . '_token') == TRUE) {
-      Response::removeCookie(self::$_sessionName . '_token', TRUE);
+    if (Request::cookieExists(self::$_sessionName . self::$_tokenPostfix) == TRUE) {
+      Response::removeCookie(self::$_sessionName . self::$_tokenPostfix, TRUE);
     }
 
-    if (Request::cookieExists(self::$_sessionName . '_uuid') == TRUE) {
-      Response::removeCookie(self::$_sessionName . '_uuid', TRUE);
+    if (Request::cookieExists(self::$_sessionName . self::$_uuidPostfix) == TRUE) {
+      Response::removeCookie(self::$_sessionName . self::$_uuidPostfix, TRUE);
     }
   }
 
