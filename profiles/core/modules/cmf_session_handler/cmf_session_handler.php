@@ -76,12 +76,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     $cookies = self::_getCookies();
 
     // see if we can get the session data based on the cookie data provided by the visitor
-    try {
-      self::$_store = self::getSessionData($cookies['token'], $cookies['uuid']);
-    }
-    catch (Exception $ex) {
-      self::$_store = array();
-    }
+    self::$_store = self::getSessionData($cookies['token'], $cookies['uuid']);
 
     // if the session exists it will have values set by the session handler
     if (count(self::$_store) > 0) {
