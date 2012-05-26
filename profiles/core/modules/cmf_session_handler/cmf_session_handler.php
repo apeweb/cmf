@@ -6,23 +6,29 @@ if (count(debug_backtrace()) == 0) {
 }
 
 class Cmf_Session_Handler implements iSession_Handler {
+  // The name of the session
   static private $_sessionName = '';
 
-  // together the following make up the session ID
-  static private $_token = NULL; // non-guessable
-  static private $_uuid = NULL; // guessable
+  // Together the following make up the session ID
+  static private $_token = NULL; // Non-guessable
+  static private $_uuid = NULL; // Guessable
 
+  // Contains all variables set for the current session
   static private $_store = array();
 
+  // Should the session be kept alive when the browser closes?
   static private $_keepAlive = FALSE;
 
+  // Used to keep the time in sync for cookies and the DB
   static private $_time = 0;
 
+  // Determines whether the session can be saved or not
   static private $_sessionWritable = FALSE;
 
+  // A flag to indicate if the session has initialised (nothing to do with whether the session has started or not)
   static private $_initialised = FALSE;
 
-  // cookie name settings
+  // Cookie name settings
   static private $_securePrefix = 'secure_';
   static private $_tokenPostfix = '_token';
   static private $_uuidPostfix = '_uuid';
@@ -33,7 +39,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     Config::setValue(CMF_REGISTRY, 'session', 'autostart', 1);
     Config::setValue(CMF_REGISTRY, 'session', 'name', 'session');
     Config::setValue(CMF_REGISTRY, 'session', 'expiration', 604800); // 1 week
-    Config::setValue(CMF_REGISTRY, 'session', 'cookie_domain', ''); // no host (automatically work out)
+    Config::setValue(CMF_REGISTRY, 'session', 'cookie_domain', ''); // No host (automatically work out)
   }
 
   public static function initialise () {
@@ -45,7 +51,6 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   private static function _initialiseSettings () {
-    // keep all times set in cookies and the DB in sync
     self::$_time = time();
 
     self::$_sessionName = Config::getValue('session', 'name');
@@ -57,39 +62,36 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   public static function start () {
-    // if the session has already started return
+    // If the session has already started to prevent the store from corrupting we quick escape
     if (self::$_initialised == TRUE && self::exists() == TRUE) {
       return;
     }
 
-    // We don't initialise extra resources until the session actually starts
     self::_initialiseSettings();
 
-    // Purge any old sessions from the database
     self::purge();
 
-    // make sure we don't cache the page
+    // Makes sure the page isn't cached
     self::_setCacheControlHeaders();
 
-    // everything we require to consider sessions initialised has now happened
+    // Everything we require to consider sessions initialised has now happened
     self::$_initialised = TRUE;
 
-    // allow the session to be saved at the end of the request
+    // Allow the session to be saved at the end of the request
     self::enableWrite();
 
-    // get the token from the cookie if one exists
+    // Get the token and UUID from the cookies if they exist
     $cookies = self::_getCookies();
 
-    // see if we can get the session data based on the cookie data provided by the visitor
+    // See if we can get the session data based on the cookie data provided by the visitor
     self::$_store = self::getSessionData($cookies['token'], $cookies['uuid']);
 
-    // if the session exists it will have values set by the session handler
+    // If the session exists it will have values set by the session handler, otherwise the self::$_store variable value will be an empty array
     if (count(self::$_store) > 0) {
-      // if a session exists make sure we set the token and UUID for internal use
+      // If a session exists make sure we set the token and UUID for internal use
       self::$_token = $cookies['token'];
       self::$_uuid = $cookies['uuid'];
 
-      // check to see if the session has been hijacked or not
       self::_checkForHijackedSession();
 
       // xxx bug with not being able to lock sessions means we can't regenerate the token
@@ -102,10 +104,9 @@ class Cmf_Session_Handler implements iSession_Handler {
        */
       //self::regenerateToken();
 
-      // should the session be remembered?
+      // Should the session be remembered?
       self::$_keepAlive = self::$_store['keep_alive'];
     }
-    // a session does not exist create one
     else {
       self::_create();
     }
@@ -169,8 +170,8 @@ class Cmf_Session_Handler implements iSession_Handler {
     return array();
   }
 
+  // A basic user agent header check to see if the session has been hijacked or not
   private static function _checkForHijackedSession () {
-    // check user agent for hijack
     if (self::$_store['user_agent'] != Request::userAgent()) {
       self::_create();
     }
@@ -181,7 +182,8 @@ class Cmf_Session_Handler implements iSession_Handler {
     self::$_token = $id['token'];
     self::$_uuid = $id['uuid'];
 
-    self::$_store = array(); // Make sure nothing has tampered with the store
+    // Make sure nothing has tampered with the store
+    self::$_store = array();
 
     // Set the default store values
     self::$_store['user_agent'] = Request::userAgent();
@@ -224,13 +226,11 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   private static function _removeCookies () {
-    if (Request::cookieExists(self::$_sessionName . self::$_tokenPostfix) == TRUE) {
+    try {
       Response::removeCookie(self::$_sessionName . self::$_tokenPostfix, TRUE);
-    }
-
-    if (Request::cookieExists(self::$_sessionName . self::$_uuidPostfix) == TRUE) {
       Response::removeCookie(self::$_sessionName . self::$_uuidPostfix, TRUE);
     }
+    catch (Exception $ex) {}
   }
 
   private static function _generateSessionId () {
@@ -325,10 +325,10 @@ class Cmf_Session_Handler implements iSession_Handler {
       throw new RuntimeException('Session does not exist');
     }
 
-    // delete all associated cookies
+    // Delete all associated cookies
     self::_removeCookies();
 
-    // Reset any variables
+    // Reset variables
     self::$_token = NULL;
     self::$_uuid = NULL;
     self::$_store = array();
@@ -374,7 +374,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     Event_Dispatcher::attachObserver(Response_Buffer_Event_Helper_Event::preprocess, __CLASS__ . '::write');
   }
 
-  // see comments for self::disableWrite()
+  // See comments for self::disableWrite()
   public static function isWritable () {
     return self::$_sessionWritable;
   }
