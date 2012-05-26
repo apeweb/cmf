@@ -199,8 +199,8 @@ class Cmf_Session_Handler implements iSession_Handler {
     $cookie->setValue(self::$_token);
     $cookie->setHttpOnly(TRUE);
 
-    if (count(explode('.', Config::getValue('session', 'cookie_domain'))) > 2 && is_numeric(str_replace('.', '', Config::getValue('session', 'cookie_domain'))) == FALSE) {
-      ini_set('session.cookie_domain', Config::getValue('session', 'cookie_domain'));
+    if (Config::hasValue('session', 'cookie_domain') == TRUE) {
+      $cookie->setDomain(Config::getValue('session', 'cookie_domain'));
     }
 
     if (self::$_keepAlive == TRUE) {
@@ -342,7 +342,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
     Event_Dispatcher::attachObserver(Response_Buffer_Event_Helper_Event::preprocess, __CLASS__ . '::write');
   }
-  
+
   // see comments for self::disableWrite()
   public static function isWritable () {
     return self::$_sessionWritable;
