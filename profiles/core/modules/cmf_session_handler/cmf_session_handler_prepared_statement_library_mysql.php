@@ -5,22 +5,21 @@ if (count(debug_backtrace()) == 0) {
   die("The page cannot be displayed.\r\nThe request has not been fulfilled because the server does not authorise access to this request externally.");
 }
 
-// xxx add support for s_id
-
 class Cmf_Session_Handler_Prepared_Statement_Library_Mysql {
   const CMF_SESSION_GET_DATA = "
     SELECT session_data
       FROM cmf_session
       WHERE session_token = :session_token
+      AND session_uuid = :session_uuid
       AND s_id = :s_id
       LIMIT 1
   ";
 
   const CMF_SESSION_INSERT = "
     INSERT INTO cmf_session
-      (session_token, session_expires, s_id)
+      (session_token, session_uuid, session_expires, s_id)
       VALUES
-      (:session_token, :session_expires, :s_id);
+      (:session_token, :session_uuid, :session_expires, :s_id);
   ";
 
   const CMF_SESSION_UPDATE = "
@@ -28,6 +27,7 @@ class Cmf_Session_Handler_Prepared_Statement_Library_Mysql {
       SET session_expires = :session_expires,
           session_data = :session_data
       WHERE session_token = :session_token
+      AND session_uuid = :session_uuid
       AND s_id = :s_id
       LIMIT 1
   ";
@@ -36,6 +36,7 @@ class Cmf_Session_Handler_Prepared_Statement_Library_Mysql {
     UPDATE cmf_session
       SET session_token = :new_session_token
       WHERE session_token = :old_session_token
+      AND session_uuid = :session_uuid
       AND s_id = :s_id
       LIMIT 1
   ";
@@ -43,6 +44,7 @@ class Cmf_Session_Handler_Prepared_Statement_Library_Mysql {
   const CMF_SESSION_DELETE = "
     DELETE FROM cmf_session
       WHERE session_token = :session_token
+      AND session_uuid = :session_uuid
       AND s_id = :s_id
       LIMIT 1
   ";
@@ -54,10 +56,15 @@ class Cmf_Session_Handler_Prepared_Statement_Library_Mysql {
   ";
 
   const CMF_SESSION_GET_TOKEN_COUNT = "
-    SELECT COUNT(*), UUID()
+    SELECT COUNT(*)
       FROM cmf_session
       WHERE session_token = :session_token
       AND s_id = :s_id
+      LIMIT 1
+  ";
+
+  const CMF_SESSION_GET_UUID = "
+    SELECT UUID()
       LIMIT 1
   ";
 }

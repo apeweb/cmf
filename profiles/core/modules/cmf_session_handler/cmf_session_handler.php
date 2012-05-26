@@ -7,10 +7,16 @@ if (count(debug_backtrace()) == 0) {
 
 class Cmf_Session_Handler implements iSession_Handler {
   static private $_sessionName = '';
+
   static private $_token = NULL;
+  static private $_uuid = NULL;
+
   static private $_store = array();
+
   static private $_keepAlive = FALSE;
+
   static private $_time = 0;
+
   static private $_sessionWritable = FALSE;
 
   static private $_initialised = FALSE;
@@ -19,7 +25,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
   public static function install () {
     Config::setValue(CMF_REGISTRY, 'session', 'autostart', 1);
-    Config::setValue(CMF_REGISTRY, 'session', 'name', 'sid');
+    Config::setValue(CMF_REGISTRY, 'session', 'name', 'session');
     Config::setValue(CMF_REGISTRY, 'session', 'expiration', 604800); // 1 week
     Config::setValue(CMF_REGISTRY, 'session', 'cookie_domain', ''); // no host (automatically work out)
   }
@@ -40,7 +46,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
     // For secure cookies use a different name
     if (Request::isSecure() == TRUE) {
-      self::$_sessionName .= '_s';
+      self::$_sessionName = 'secure_' . self::$_sessionName;
     }
   }
 
@@ -66,15 +72,21 @@ class Cmf_Session_Handler implements iSession_Handler {
     self::enableWrite();
 
     // get the token from the cookie if one exists
-    $token = self::_getCookieToken();
+    $cookies = self::_getCookies();
 
     // see if we can get the session data based on the cookie token
-    self::$_store = self::getSessionData($token);
+    try {
+      self::$_store = self::getSessionData($cookies);
+    }
+    catch (Exception $ex) {
+      self::$_store = array();
+    }
 
     // if the session exists it will have values set by the session handler
     if (count(self::$_store) > 0) {
       // if a session exists make sure we set the token for internal use
-      self::$_token = $token;
+      self::$_token = $cookies['token'];
+      self::$_uuid = $cookies['uuid'];
 
       // check to see if the session has been hijacked or not
       self::_checkForHijackedSession();
@@ -118,26 +130,42 @@ class Cmf_Session_Handler implements iSession_Handler {
     Response_Buffer::setHeader('Pragma', 'no-cache');
   }
 
-  private static function _getCookieToken () {
-    $token = '';
+  private static function _getCookies () {
+    $id = array();
 
-    if (Request::cookieExists(self::$_sessionName) == TRUE) {
-      $cookie = Request::getCookie(self::$_sessionName);
-      $token = strval($cookie->getValue());
+    if (Request::cookieExists(self::$_sessionName . '_token') == TRUE) {
+      $cookie = Request::getCookie(self::$_sessionName . '_token');
+      $id['token'] = strval($cookie->getValue());
     }
 
-    Debug::logMessage('Existing Session Token:', $token);
+    if (Request::cookieExists(self::$_sessionName . '_uuid') == TRUE) {
+      $cookie = Request::getCookie(self::$_sessionName . '_uuid');
+      $id['uuid'] = strval($cookie->getValue());
+    }
 
-    return $token;
+    if (count($id) != 2) {
+      return array();
+    }
+
+    return $id;
   }
 
   // Get the session data for a user based on the session token, because session data is read only to outside classes
   // (to avoid session session poisoning) there is no setSessionData method
-  public static function getSessionData ($token) {
-    Assert::isString($token);
+  public static function getSessionData ($id) {
+    Assert::isArray($id);
+
+    if (isset($id['token']) == FALSE) {
+      throw new Argument_Exception("Missing key 'token' in \$id parameter");
+    }
+
+    if (isset($id['uuid']) == FALSE) {
+      throw new Argument_Exception("Missing key 'token' in \$id parameter");
+    }
 
     $query = Cmf_Database::call('cmf_session_get_data', self::Prepared_Statement_Library);
-    $query->bindValue(':session_token', $token);
+    $query->bindValue(':session_token', $id['token']);
+    $query->bindValue(':session_uuid', $id['uuid']);
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
 
@@ -168,7 +196,10 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   private static function _create () {
-    self::$_token = self::_generateToken();
+    $id = self::_generateSessionId();
+    self::$_token = $id['token'];
+    self::$_uuid = $id['uuid'];
+
     self::$_store = array(); // Make sure nothing has tampered with the store
 
     // Set the default store values
@@ -180,6 +211,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     $query = Cmf_Database::call('cmf_session_insert', self::Prepared_Statement_Library);
     $query->bindValue(':session_expires', self::_getExpires());
     $query->bindValue(':session_token', self::$_token);
+    $query->bindValue(':session_uuid', self::$_uuid);
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $sessionCreated = $query->execute();
 
@@ -188,11 +220,16 @@ class Cmf_Session_Handler implements iSession_Handler {
     }
   }
 
-  private static function _setCookie () {
+  private static function _setCookies () {
+    self::_setCookie(self::$_sessionName . '_token', self::$_token);
+    self::_setCookie(self::$_sessionName . '_uuid', self::$_uuid);
+  }
+
+  private static function _setCookie ($name, $value) {
     $cookie = new Cookie;
 
-    $cookie->setName(self::$_sessionName);
-    $cookie->setValue(self::$_token);
+    $cookie->setName($name);
+    $cookie->setValue($value);
     $cookie->setHttpOnly(TRUE);
 
     /**
@@ -218,14 +255,25 @@ class Cmf_Session_Handler implements iSession_Handler {
     Response::setCookie($cookie);
   }
 
-  private static function _removeCookie () {
-    if (Request::cookieExists(self::$_sessionName) == TRUE) {
-      Response::removeCookie(self::$_sessionName, TRUE);
+  private static function _removeCookies () {
+    if (Request::cookieExists(self::$_sessionName . '_token') == TRUE) {
+      Response::removeCookie(self::$_sessionName . '_token', TRUE);
+    }
+
+    if (Request::cookieExists(self::$_sessionName . '_uuid') == TRUE) {
+      Response::removeCookie(self::$_sessionName . '_uuid', TRUE);
     }
   }
 
-  private static function _generateToken () {
+  private static function _generateSessionId () {
+    $i = 0;
+
+    // Get a token
     do {
+      if (++$i == PHP_INT_MAX) {
+        throw new RuntimeException("Recursion loop detected");
+      }
+
       $token = Hash::id(str_shuffle('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'));
 
       $query = Cmf_Database::call('cmf_session_get_token_count', self::Prepared_Statement_Library);
@@ -233,14 +281,14 @@ class Cmf_Session_Handler implements iSession_Handler {
       $query->bindValue(':s_id', Config::getValue('site', 'id'));
       $query->execute();
     }
-    while ($query->fetchColumn(0) > 0);
+    while ($query->fetchColumn() > 0);
 
-    // $query->fetchColumn(0) has a session token which may not be unique across a server farm but is not guessable
-    // xxx make use of $query->fetchColumn(1) which is the unique (guessable) id
+    // Get a uuid
+    $query = Cmf_Database::call('cmf_session_get_uuid', self::Prepared_Statement_Library);
+    $query->execute();
+    $uuid = $query->fetchColumn();
 
-    Debug::logMessage('New Session Token:', $token);
-
-    return $token;
+    return array('token' => $token, 'uuid' => $uuid);
   }
 
   public static function exists () {
@@ -256,12 +304,14 @@ class Cmf_Session_Handler implements iSession_Handler {
       throw new RuntimeException('Session does not exist');
     }
 
+    $id = self::_generateSessionId();
     $old_token = self::$_token;
-    $new_token = self::_generateToken();
+    $new_token = $id['token'];
 
     $query = Cmf_Database::call('cmf_session_update_token', self::Prepared_Statement_Library);
     $query->bindValue(':old_session_token', $old_token);
     $query->bindValue(':new_session_token', $new_token);
+    $query->bindValue(':session_uuid', self::$_uuid);
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
 
     if ($query->execute() == TRUE) {
@@ -287,6 +337,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
     $query = Cmf_Database::call('cmf_session_delete', self::Prepared_Statement_Library);
     $query->bindValue(':session_token', self::$_token);
+    $query->bindValue(':session_uuid', self::$_uuid);
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
 
@@ -303,10 +354,11 @@ class Cmf_Session_Handler implements iSession_Handler {
     }
 
     // delete all associated cookies
-    self::_removeCookie();
+    self::_removeCookies();
 
     // Reset any variables
     self::$_token = NULL;
+    self::$_uuid = NULL;
     self::$_store = array();
 
     self::disableWrite();
@@ -368,10 +420,11 @@ class Cmf_Session_Handler implements iSession_Handler {
       throw new RuntimeException('Session is set to read-only');
     }
 
-    self::_setCookie();
+    self::_setCookies();
 
     $query = Cmf_Database::call('cmf_session_update', self::Prepared_Statement_Library);
     $query->bindValue(':session_token', self::$_token);
+    $query->bindValue(':session_uuid', self::$_uuid);
     $query->bindValue(':session_expires', self::_getExpires());
     $query->bindValue(':session_data', base64_encode(serialize(self::$_store)));
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
