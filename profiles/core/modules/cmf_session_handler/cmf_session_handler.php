@@ -199,18 +199,6 @@ class Cmf_Session_Handler implements iSession_Handler {
     self::$_store['total_requests'] = 1; // counts the number of requests made
     self::$_store['user_agent'] = Request::userAgent();
     self::$_store['keep_alive'] = FALSE; // By default the session ends when the browser closes
-
-    // create the session
-    $query = Cmf_Database::call('cmf_session_insert', self::Prepared_Statement_Library);
-    $query->bindValue(':session_expires', self::_getExpires());
-    $query->bindValue(':session_token', self::$_token);
-    $query->bindValue(':session_uuid', self::$_uuid);
-    $query->bindValue(':s_id', Config::getValue('site', 'id'));
-    $sessionCreated = $query->execute();
-
-    if ($sessionCreated == FALSE) {
-      self::close();
-    }
   }
 
   private static function _setCookies () {
@@ -261,25 +249,29 @@ class Cmf_Session_Handler implements iSession_Handler {
   private static function _generateSessionId () {
     $i = 0;
 
+    // Get a uuid
+    $query = Cmf_Database::call('cmf_session_get_uuid', self::Prepared_Statement_Library);
+    $query->execute();
+    $uuid = $query->fetchColumn();
+
     // Get a token
     do {
-      if (++$i == PHP_INT_MAX) {
+      // Prevent an infinite loop from using all of the resources
+      if (++$i == 50) {
         throw new RuntimeException("Recursion loop detected");
       }
 
       $token = Hash::id(str_shuffle('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'));
 
-      $query = Cmf_Database::call('cmf_session_get_token_count', self::Prepared_Statement_Library);
+      // In order to generate a session ID, we must create an entry in the table to reserve the token
+      $query = Cmf_Database::call('cmf_session_insert', self::Prepared_Statement_Library);
+      $query->bindValue(':session_expires', self::_getExpires());
       $query->bindValue(':session_token', $token);
+      $query->bindValue(':session_uuid', $uuid);
       $query->bindValue(':s_id', Config::getValue('site', 'id'));
-      $query->execute();
+      $sessionCreated = $query->execute();
     }
-    while ($query->fetchColumn() > 0);
-
-    // Get a uuid
-    $query = Cmf_Database::call('cmf_session_get_uuid', self::Prepared_Statement_Library);
-    $query->execute();
-    $uuid = $query->fetchColumn();
+    while ($sessionCreated == FALSE);
 
     return array('token' => $token, 'uuid' => $uuid);
   }

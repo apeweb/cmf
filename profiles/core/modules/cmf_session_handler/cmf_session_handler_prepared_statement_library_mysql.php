@@ -55,14 +55,6 @@ class Cmf_Session_Handler_Prepared_Statement_Library_Mysql {
       AND s_id = :s_id
   ";
 
-  const CMF_SESSION_GET_TOKEN_COUNT = "
-    SELECT COUNT(*)
-      FROM cmf_session
-      WHERE session_token = :session_token
-      AND s_id = :s_id
-      LIMIT 1
-  ";
-
   const CMF_SESSION_GET_UUID = "
     SELECT UUID()
       LIMIT 1
