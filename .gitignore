@@ -34,6 +34,14 @@ Icon?
 Thumbs.db
 
 # Test files #
-######################
+##############
 test.php
 *.test
+
+# IDE files #
+#############
+.idea/
+
+# CMF files #
+#############
+cmf_startup_errors.tsv
