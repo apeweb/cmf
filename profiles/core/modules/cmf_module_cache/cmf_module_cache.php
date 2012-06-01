@@ -72,6 +72,14 @@ class Cmf_Module_Cache {
       throw new RuntimeException("Module '{$module['system_name']}' already exists");
     }
 
+    if (isset($module['initialise_function']) == FALSE) {
+      $module['initialise_function'] = '';
+    }
+
+    if (isset($module['default_weight']) == FALSE) {
+      $module['default_weight'] = 0;
+    }
+
     $path = preg_replace('#^' . CMF_ROOT . '#', '', $module['path']);
 
     $query = Cmf_Database::call('cmf_module_cache_add', self::Prepared_Statement_Library);
