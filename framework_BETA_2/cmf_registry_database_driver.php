@@ -181,6 +181,7 @@ class Cmf_Registry_Database_Driver extends Config_Array_Driver {
      * rows at the same time making it use lots of memory
      */
     while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+      // xxx values should be base64_encoded
       $this->_array[$row['r_name']] = unserialize($row['r_value']);
     }
   }
