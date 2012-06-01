@@ -17,8 +17,8 @@ class Admin_Authentication_Controller extends Controller {
   public static function promptAuthentication () {
     // If the user is logging out
     if (isset($_GET['action']) == TRUE && $_GET['action'] == 'logout') {
-      if (Session::valueExists('admin_username') == TRUE) {
-        Session::deleteValue('admin_username');
+      if (Session::getStore()->valueExists('admin_username') == TRUE) {
+        Session::getStore()->deleteValue('admin_username');
       }
       $redirectPath = Cmf_Route_Table::routes()->getRoute('admin_authentication')->getUrl(array('action' => 'login'));
       Response::redirect($redirectPath, 303);
@@ -36,14 +36,14 @@ class Admin_Authentication_Controller extends Controller {
     $controller = Controller_Builder::getControllerFactory()->normaliseControllerName($controllerName);
 
     // If the user is already logged in
-    if (Session::valueExists('admin_username') == TRUE && Session::getValue('admin_username') != '') {
+    if (Session::getStore()->valueExists('admin_username') == TRUE && Session::getStore()->getValue('admin_username') != '') {
       if (self::$_access == NULL) {
         self::$_access = new Cmf_Authorisation;
         self::$_access->grantRoleAccess('Administrate Website');
         self::$_access->grantGroupAccess('Administrators');
       }
 
-      if (self::$_access->isUserAuthorised(Session::getValue('admin_username')) == FALSE) {
+      if (self::$_access->isUserAuthorised(Session::getStore()->getValue('admin_username')) == FALSE) {
         // Does the user have permission to access this page?
         if (count(Cmf_Flash_Message::getMessage('error', FALSE)) > 0) {
           if ($controller != __CLASS__) {
@@ -67,7 +67,7 @@ class Admin_Authentication_Controller extends Controller {
     else {
       // Get the location of the user so that we can redirect them back there once they have logged in
       if ($controller != __CLASS__) {
-        Session::setValue('admin_redirect_path', Request::path());
+        Session::getStore()->setValue('admin_redirect_path', Request::path());
       }
 
       self::_renderLoginView();
@@ -105,7 +105,13 @@ class Admin_Authentication_Controller extends Controller {
       return;
     }
 
-    Session::setValue('admin_username', $user->getUserName());
+    // xxx should be using the control to get the value
+    // xxx should Session have a keep alive option?
+    if (isset($_POST['security']) && $_POST['security'] == 'private') {
+      Cmf_Session_Handler::setKeepAlive(TRUE);
+    }
+
+    Session::getStore()->setValue('admin_username', $user->getUserName());
   }
   
   private static function _renderLoginView () {

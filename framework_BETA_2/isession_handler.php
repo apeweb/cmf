@@ -12,10 +12,7 @@ interface iSession_Handler {
   public static function close();
   public static function write();
   public static function purge();
-  public static function setValue($key, $value);
-  public static function getValue($key);
-  public static function valueExists($key);
-  public static function deleteValue($key);
+  public static function getStore();
 }
 
 ?>

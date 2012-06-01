@@ -8,7 +8,7 @@ if (count(debug_backtrace()) == 0) {
 class Cmf_Flash_Message {
   public static function setMessage ($message, $type = '', $repeat = TRUE) {
     try {
-      $messages = Session::getValue('flash_message');
+      $messages = Session::getStore()->getValue('flash_message');
     }
     catch (Exception $ex) {
       $messages = array();
@@ -22,7 +22,7 @@ class Cmf_Flash_Message {
       $messages[$type][] = $message;
     }
 
-    Session::setValue('flash_message', $messages);
+    Session::getStore()->setValue('flash_message', $messages);
 
     // xxx mark this page as being uncacheable.
     //drupal_page_is_cacheable(FALSE);
@@ -34,7 +34,7 @@ class Cmf_Flash_Message {
     $flashMessages = array();
 
     try {
-      $messages = Session::getValue('flash_message');
+      $messages = Session::getStore()->getValue('flash_message');
     }
     catch (Exception $ex) {
       $messages = array();
@@ -51,17 +51,17 @@ class Cmf_Flash_Message {
         }
 
         if (count($messages) > 0) {
-          Session::setValue('flash_message', $messages);
+          Session::getStore()->setValue('flash_message', $messages);
         }
         else {
-          Session::deleteValue('flash_message');
+          Session::getStore()->deleteValue('flash_message');
         }
       }
       else {
         $flashMessages = $messages;
 
         if ($clearQueue == TRUE) {
-          Session::deleteValue('flash_message');
+          Session::getStore()->deleteValue('flash_message');
         }
       }
     }

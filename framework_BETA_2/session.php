@@ -97,31 +97,7 @@ class Session {
     return call_user_func_array(self::$_handler . '::' . __FUNCTION__, func_get_args());
   }
 
-  public static function setValue () {
-    if (self::handlerExists() == FALSE) {
-      // xxx throw exception
-    }
-
-    return call_user_func_array(self::$_handler . '::' . __FUNCTION__, func_get_args());
-  }
-
-  public static function getValue () {
-    if (self::handlerExists() == FALSE) {
-      // xxx throw exception
-    }
-
-    return call_user_func_array(self::$_handler . '::' . __FUNCTION__, func_get_args());
-  }
-  
-  public static function valueExists () {
-    if (self::handlerExists() == FALSE) {
-      // xxx throw exception
-    }
-
-    return call_user_func_array(self::$_handler . '::' . __FUNCTION__, func_get_args());
-  }
-
-  public static function deleteValue () {
+  public static function getStore () {
     if (self::handlerExists() == FALSE) {
       // xxx throw exception
     }
