@@ -59,7 +59,7 @@ if (count(debug_backtrace()) == 0) {
             <table class="data tree_order_rows" border="1">
               <thead>
                 <tr>
-                  <th>Link Title</th>
+                  <th>Title</th>
                   <th>URL</th>
                   <th>Weight</th>
                   <th>Active</th>
