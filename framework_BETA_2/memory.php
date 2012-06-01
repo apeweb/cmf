@@ -16,7 +16,7 @@ class Memory {
     list($key, $value, $originalKey) = self::_getArgs(func_get_args());
 
     if (array_key_exists($key, self::$_locks) == TRUE) {
-      throw new RuntimeException("Memory value " . $originalKey . " is locked");
+      throw new RuntimeException("Value " . $originalKey . " is locked");
     }
 
     self::$_cache[$key] = $value;
@@ -30,7 +30,7 @@ class Memory {
 
     if (array_key_exists($key, self::$_locks) == TRUE) {
       // Have to throw an exception as we need to know if a key is already locked
-      throw new RuntimeException("Lock already exists for memory value " . $originalKey);
+      throw new RuntimeException("Lock already exists for value " . $originalKey);
     }
 
     self::$_locks[$key] = $password;
@@ -42,11 +42,11 @@ class Memory {
     list($key, $password, $originalKey) = self::_getArgs(func_get_args());
 
     if (isset(self::$_locks[$key]) == FALSE) {
-      throw new RuntimeException("Lock does not exists for memory value " . $originalKey);
+      throw new RuntimeException("Lock does not exists for value " . $originalKey);
     }
 
     if (self::$_locks[$key] !== $password) {
-      throw new RuntimeException("Password for memory value lock " . $originalKey . " is incorrect");
+      throw new RuntimeException("Password for value lock " . $originalKey . " is incorrect");
     }
 
     unset(self::$_locks[$key]);
@@ -61,7 +61,7 @@ class Memory {
     $key = md5($originalKey);
 
     if (array_key_exists($key, self::$_cache) == FALSE) {
-      throw new Missing_Value_Exception("Memory value " . $originalKey . " does not exist");
+      throw new Missing_Value_Exception("Value " . $originalKey . " does not exist");
     }
 
     return self::$_cache[$key];
