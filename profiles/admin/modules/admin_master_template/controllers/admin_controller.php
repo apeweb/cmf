@@ -25,7 +25,7 @@ class Admin_Controller extends Controller {
     View_Data::setValue('footer', $footer);
 
     // xxx move into a block/module
-    $sessionInformation = '<p>You are logged in as &quot;' . Session::getValue('admin_username') . '&quot; and have no unread messages.</p>';
+    $sessionInformation = '<p>You are logged in as &quot;' . Session::getStore()->getValue('admin_username') . '&quot; and have no unread messages.</p>';
     View_Data::setValue('session_information', $sessionInformation);
 
     $content = new Cmf_Template_Control;
@@ -50,11 +50,10 @@ class Admin_Controller extends Controller {
     $js->addJs('/misc/scripts/jquery.colresizable.js');
     $js->addJs('/misc/scripts/jquery.tablesorter.js');
     $js->addJs('/misc/scripts/jquery.form.js');
-    $js->addJs('/profiles/admin/js/admin.js');
-
-    $js->addJs('http://chelmsford_cms/misc/jquery.once.js');
-    $js->addJs('http://chelmsford_cms/profiles/openpublic/modules/contrib/jquery_update/replace/ui/ui/minified/jquery.ui.droppable.min.js');
+    $js->addJs('/misc/scripts/jquery.once.js');
+    $js->addJs('/misc/scripts/jquery.ui.droppable.min.js');
     $js->addJs('/misc/scripts/jquery.tabledrag.js');
+    $js->addJs('/profiles/admin/js/admin.js');
 
     View_Data::setValue('head', 'js', $js);
 
