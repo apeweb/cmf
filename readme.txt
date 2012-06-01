@@ -50,14 +50,49 @@ See the Cmf_Menu_Link for an example of how a class should be strucutred.
 Naming Conventions
 ==================
 
-* At all times, there should be no two classes with the same name
+General
 * Avoid abbreviations, use full words instead
-* Properties should be named using camel-cased named
+
+OOP Classes
 * Classes should use underscores to separate words
+* At all times, there should be no two classes with the same name
+
+OOP Properties
+* Properties should be named using camel-cased named
+
+OOP Methods
+* "remove" is to end the relationship between two objects, "delete" is to
+  delete an actual object
+* "add" should be used to add something such as a relationship, new ClassName
+  should be used to create a new object
+* "save" should be used where a change was previously made, "update" should be
+  not be used to save changes to an objec
+
+CSS Classes
 * CSS classes should use underscores opposed to dashes or camel-cased naming
+
+Paths
 * URL's should use dashes opposed to underscores or camel-cased naming, all
   words should be lowercase
 * All filenames should use underscores to separate words
+
+
+DATABASE PRACTISES
+==================
+
+* All tables should have a prefix to help identify what group of modules or
+  what feature of the site they relate to
+* All tables should have their own unique code to which all fields that belong
+  to that table (excluding foreign keys) should be prefixed with the unique
+  code for that table
+* All tables except those using the archive data storage type should have a
+  primary key which preferably is a numeric ID
+* All tables should have a s_id column (which is used to specify the site the
+  row belongs to)
+* All tables should have an active and delete field, active is used to specify
+  whether the field is in use or shows on the public facing website and the
+  deleted field is used to mark the row as deleted (allowing the delete action
+  to be undone if required)
 
 
 Conventions Coming Soon
