@@ -5,30 +5,30 @@ if (count(debug_backtrace()) == 0) {
   die("The page cannot be displayed.\r\nThe request has not been fulfilled because the server does not authorise access to this request externally.");
 }
 
-class Data_Store extends ArrayObject implements Countable {
-  public function __set ($variableName, $value) {
-    $this[$variableName] = $value;
+class Store extends ArrayObject {
+  public function setValue ($name, $value) {
+    Assert::isString($name);
+    $this[$name] = $value;
   }
 
-  public function __get ($variableName) {
-    if (array_key_exists($variableName, $this)) {
-      return $this[$variableName];
+  public function getValue ($name) {
+    Assert::isString($name);
+
+    if (self::valueExists($name) == FALSE) {
+      throw new Missing_Value_Exception($name);
     }
-    else {
-      throw new Missing_Value_Exception($variableName);
-    }
+
+    return $this[$name];
   }
 
-  public function __isset ($variableName) {
-    return isset($this[$variableName]);
+  public function valueExists ($name) {
+    Assert::isString($name);
+    return array_key_exists($name, $this);
   }
 
-  public function __unset ($variableName) {
-    unset($this[$variableName]);
-  }
-  
-  public function count () {
-    return count($this);
+  public function deleteValue ($name) {
+    Assert::isString($name);
+    unset($this[$name]);
   }
 }
 
