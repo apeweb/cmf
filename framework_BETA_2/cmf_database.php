@@ -80,6 +80,10 @@ class Cmf_Database {
 
     return Database::prepare($sql, $connectionName);
   }
+
+  static public function getConnection () {
+    return Database::getActiveConnection();
+  }
 }
 
 ?>
