@@ -53,18 +53,23 @@ abstract class Control {
   }
 
   public function __toString () {
-    if ($this->_timesToRender == $this->_timeRendered) {
-      // xxx throw new exception
-      return NULL;
+    try {
+      if ($this->_timesToRender == $this->_timeRendered) {
+        return NULL;
+      }
+
+      if ($this->isProcessed() == FALSE) {
+        $this->process();
+      }
+
+      ++$this->_timeRendered;
+
+      return $this->_content;
     }
-
-    if ($this->isProcessed() == FALSE) {
-      $this->process();
+    catch (Exception $ex) {
+      // xxx log the error and don't display it to the user if in production
+      return $ex->getMessage() . ' on line ' . $ex->getLine() . ' of file ' . $ex->getFile() . '<pre>' . print_r(debug_backtrace(), TRUE) . '</pre>';
     }
-
-    ++$this->_timeRendered;
-
-    return $this->_content;
   }
 
   public function isProcessed () {
