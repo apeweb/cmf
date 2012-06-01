@@ -25,6 +25,10 @@ class Cookie {
       $cookieString .= '; Path=' . $this->_path;
     }
 
+    /**
+     * If the domain doesn't match the RFC specification (localhost and IP addresses for instance) don't set a domain at
+     * all so that the browser assumes the cookie is for the current domain
+     */
     if (trim($this->_domain) != '' && count(explode('.', $this->_domain)) > 2 && !is_numeric(str_replace('.', '', $this->_domain))) {
       $cookieString .= '; Domain=' . $this->_domain;
     }
