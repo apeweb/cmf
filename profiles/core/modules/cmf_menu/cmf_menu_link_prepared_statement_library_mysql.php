@@ -35,13 +35,16 @@ class Cmf_Menu_Link_Prepared_Statement_Library_Mysql {
           mnl_active = :mnl_active
       WHERE mnl_id = :mnl_id
         AND s_id = :s_id
+        AND mnl_deleted = '0'
       LIMIT 1
   ";
 
   const CMF_MENU_LINK_DELETE = "
-    DELETE FROM cmf_menu_link
+    UPDATE cmf_menu_link
+      SET mnl_deleted = '1'
       WHERE mnl_id = :mnl_id
         AND s_id = :s_id
+        AND mnl_deleted = '0'
       LIMIT 1
   ";
 }
