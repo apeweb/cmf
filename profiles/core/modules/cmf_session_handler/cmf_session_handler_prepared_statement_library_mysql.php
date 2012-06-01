@@ -17,9 +17,9 @@ class Cmf_Session_Handler_Prepared_Statement_Library_Mysql {
 
   const CMF_SESSION_INSERT = "
     INSERT INTO cmf_session
-      (session_token, session_uuid, session_expires, s_id)
+      (session_token, session_uuid, session_expires, session_data, s_id)
       VALUES
-      (:session_token, :session_uuid, :session_expires, :s_id);
+      (:session_token, :session_uuid, :session_expires, :session_data, :s_id);
   ";
 
   const CMF_SESSION_UPDATE = "
@@ -27,15 +27,6 @@ class Cmf_Session_Handler_Prepared_Statement_Library_Mysql {
       SET session_expires = :session_expires,
           session_data = :session_data
       WHERE session_token = :session_token
-      AND session_uuid = :session_uuid
-      AND s_id = :s_id
-      LIMIT 1
-  ";
-
-  const CMF_SESSION_UPDATE_TOKEN = "
-    UPDATE cmf_session
-      SET session_token = :new_session_token
-      WHERE session_token = :old_session_token
       AND session_uuid = :session_uuid
       AND s_id = :s_id
       LIMIT 1
@@ -55,6 +46,7 @@ class Cmf_Session_Handler_Prepared_Statement_Library_Mysql {
       AND s_id = :s_id
   ";
 
+  // xxx move to a function or something
   const CMF_SESSION_GET_UUID = "
     SELECT UUID()
       LIMIT 1

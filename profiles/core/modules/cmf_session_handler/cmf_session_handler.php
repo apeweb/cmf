@@ -5,6 +5,9 @@ if (count(debug_backtrace()) == 0) {
   die("The page cannot be displayed.\r\nThe request has not been fulfilled because the server does not authorise access to this request externally.");
 }
 
+// xxx using databases is considered to be slow when it comes to dealing with sessions, so we need to make a copy of this and rewrite it to support memcache
+// xxx need some form of locking to prevent session corruption (such as the case with missing files and the session table filling up with new invalid sessions)
+// xxx TABLE LOCKING TABLE LOCKING TABLE LOCKING!!!
 class Cmf_Session_Handler implements iSession_Handler {
   // The name of the session
   static private $_sessionName = '';
@@ -14,7 +17,7 @@ class Cmf_Session_Handler implements iSession_Handler {
   static private $_uuid = NULL; // Guessable
 
   // Contains all variables set for the current session
-  static private $_store = array();
+  static private $_store = NULL;
 
   // Should the session be kept alive when the browser closes?
   static private $_keepAlive = FALSE;
@@ -25,13 +28,12 @@ class Cmf_Session_Handler implements iSession_Handler {
   // Determines whether the session can be saved or not
   static private $_sessionWritable = FALSE;
 
-  // A flag to indicate if the session has initialised (nothing to do with whether the session has started or not)
-  static private $_initialised = FALSE;
-
   // Cookie name settings
   static private $_securePrefix = 'secure_';
   static private $_tokenPostfix = '_token';
   static private $_uuidPostfix = '_uuid';
+
+  static private $_cookiesFound = FALSE;
 
   const Prepared_Statement_Library = 'cmf_session_handler_prepared_statement_library';
 
@@ -45,12 +47,18 @@ class Cmf_Session_Handler implements iSession_Handler {
   public static function initialise () {
     Session::setHandler(__CLASS__);
 
-    if (self::$_initialised == FALSE && Config::getValue('session', 'autostart') == TRUE) {
+    if (Config::getValue('session', 'autostart') == TRUE) {
       self::start();
     }
   }
 
   private static function _initialiseSettings () {
+    static $initialised = FALSE;
+
+    if ($initialised == TRUE) {
+      return;
+    }
+
     self::$_time = time();
 
     self::$_sessionName = Config::getValue('session', 'name');
@@ -59,23 +67,24 @@ class Cmf_Session_Handler implements iSession_Handler {
     if (Request::isSecure() == TRUE) {
       self::$_sessionName = self::$_securePrefix . self::$_sessionName;
     }
+
+    // Prevent caching
+    Response_Buffer::setHeader('Expires', 'Mon, 19 Nov 1981 08:52:00 GMT');
+    Response_Buffer::setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+    Response_Buffer::setHeader('Pragma', 'no-cache');
+
+    $initialised = TRUE;
   }
 
   public static function start () {
     // If the session has already started to prevent the store from corrupting we quick escape
-    if (self::$_initialised == TRUE && self::exists() == TRUE) {
+    if (self::exists() == TRUE) {
       return;
     }
 
     self::_initialiseSettings();
 
     self::purge();
-
-    // Makes sure the page isn't cached
-    self::_setCacheControlHeaders();
-
-    // Everything we require to consider sessions initialised has now happened
-    self::$_initialised = TRUE;
 
     // Allow the session to be saved at the end of the request
     self::enableWrite();
@@ -84,7 +93,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     $cookies = self::_getCookies();
 
     // See if we can get the session data based on the cookie data provided by the visitor
-    self::$_store = self::getSessionData($cookies['token'], $cookies['uuid']);
+    self::$_store = self::_getSessionData($cookies['token'], $cookies['uuid']);
 
     // If the session exists it will have values set by the session handler, otherwise the self::$_store variable value will be an empty array
     if (count(self::$_store) > 0) {
@@ -94,14 +103,7 @@ class Cmf_Session_Handler implements iSession_Handler {
 
       self::_checkForHijackedSession();
 
-      // xxx bug with not being able to lock sessions means we can't regenerate the token
-      /**
-       * the bug:
-       * the browser makes 3 requests at the same time
-       * the first request regenerates the token from A1 to B2
-       * the second request looks for A1 which doesn't exist anymore as it is now B2, and since it can't find A1 it creates a new session C3
-       * the third comes along, and does the same as the second
-       */
+      // xxx not working properly
       //self::regenerateToken();
 
       // Should the session be remembered?
@@ -124,13 +126,13 @@ class Cmf_Session_Handler implements iSession_Handler {
     return $expires;
   }
 
-  private static function _setCacheControlHeaders () {
-    Response_Buffer::setHeader('Expires', 'Mon, 19 Nov 1981 08:52:00 GMT');
-    Response_Buffer::setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-    Response_Buffer::setHeader('Pragma', 'no-cache');
-  }
-
   private static function _getCookies () {
+    static $cookies = array();
+
+    if (count($cookies) > 0) {
+      return $cookies;
+    }
+
     $cookies = array(
       'token' => '',
       'uuid' => ''
@@ -139,22 +141,25 @@ class Cmf_Session_Handler implements iSession_Handler {
     if (Request::cookieExists(self::$_sessionName . self::$_tokenPostfix) == TRUE) {
       $cookie = Request::getCookie(self::$_sessionName . self::$_tokenPostfix);
       $cookies['token'] = strval($cookie->getValue());
+      self::$_cookiesFound = TRUE;
     }
 
     if (Request::cookieExists(self::$_sessionName . self::$_uuidPostfix) == TRUE) {
       $cookie = Request::getCookie(self::$_sessionName . self::$_uuidPostfix);
       $cookies['uuid'] = strval($cookie->getValue());
+      self::$_cookiesFound = TRUE;
     }
 
     return $cookies;
   }
 
-  // Get the session data for a user based on the session token, because session data is read only to outside classes
-  // (to avoid session session poisoning) there is no setSessionData method
-  public static function getSessionData ($token, $uuid) {
+  private static function _getSessionData ($token, $uuid) {
     Assert::isString($token);
     Assert::isString($uuid);
 
+    $store = NULL;
+
+    // Get the data
     $query = Cmf_Database::call('cmf_session_get_data', self::Prepared_Statement_Library);
     $query->bindValue(':session_token', $token);
     $query->bindValue(':session_uuid', $uuid);
@@ -164,10 +169,24 @@ class Cmf_Session_Handler implements iSession_Handler {
     $sessionData = strval($query->fetchColumn());
 
     if ($sessionData != '') {
-      return (array) unserialize(base64_decode($sessionData));
+      $store = self::_decodeData($sessionData);
     }
 
-    return array();
+    // Check for a redirect
+    while ($store instanceof Store && count($store) == 1 && array_key_exists('new_token', $store) == TRUE) {
+      $store = self::_getSessionData($store['new_token'], $uuid);
+    }
+
+    // Either the store failed to unserialize, the store could not be found, the session is invalid or has expired
+    if (($store instanceof Store) == FALSE) {
+      if (self::$_cookiesFound == TRUE) {
+        // xxx trigger an event so that we can show a session invalid/expired page
+        // xxx also make cookies last twice as long as session so we can show a session expired page
+      }
+      $store = new Store;
+    }
+
+    return $store;
   }
 
   // A basic user agent header check to see if the session has been hijacked or not
@@ -182,8 +201,8 @@ class Cmf_Session_Handler implements iSession_Handler {
     self::$_token = $id['token'];
     self::$_uuid = $id['uuid'];
 
-    // Make sure nothing has tampered with the store
-    self::$_store = array();
+    // Create a new session store
+    self::$_store = new Store;
 
     // Set the default store values
     self::$_store['user_agent'] = Request::userAgent();
@@ -196,6 +215,9 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   private static function _setCookie ($name, $value) {
+    Assert::isString($name);
+    Assert::isString($value);
+
     $cookie = new Cookie;
 
     $cookie->setName($name);
@@ -211,12 +233,14 @@ class Cmf_Session_Handler implements iSession_Handler {
         $cookie->setDomain(Config::getValue('session', 'cookie_domain'));
       }
       else {
-        $cookie->setDomain(Config::getValue('session', Request::host()));
+        $cookie->setDomain(Request::host());
       }
     }
 
     if (self::$_keepAlive == TRUE) {
-      $cookie->setExpire(self::_getExpires());
+      // We set the cookies to remain stored twice as long as the session so that we can inform the user that the session has expired
+      $expires = ((self::_getExpires() - self::$_time) * 2) + self::$_time;
+      $cookie->setExpire($expires);
     }
     else {
       $cookie->setExpire(0);
@@ -234,20 +258,28 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   private static function _generateSessionId () {
-    $i = 0;
+    if (self::$_uuid !== NULL) {
+      $uuid = self::$_uuid;
+    }
+    else {
+      // Get a uuid
+      $query = Cmf_Database::call('cmf_session_get_uuid', self::Prepared_Statement_Library);
+      $query->execute();
+      $uuid = $query->fetchColumn();
+    }
 
-    // Get a uuid
-    $query = Cmf_Database::call('cmf_session_get_uuid', self::Prepared_Statement_Library);
-    $query->execute();
-    $uuid = $query->fetchColumn();
+    // xxx temp to see why we keep spawning lots of duplicates of the same session
+    $store = new Store;
+    if (self::$_cookiesFound == TRUE) {
+      $cookies = self::_getCookies();
+      $store->setValue('_old_cookie_token', $cookies['token']);
+      $store->setValue('_old_cookie_uuid', $cookies['uuid']);
+      self::$_store['_old_cookie_token'] = $cookies['token'];
+      self::$_store['_old_cookie_uuid'] = $cookies['uuid'];
+    }
 
     // Get a token
     do {
-      // Prevent an infinite loop from using all of the resources
-      if (++$i == 50) {
-        throw new RuntimeException("Recursion loop detected");
-      }
-
       $token = Hash::id(str_shuffle('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'));
 
       // In order to generate a session ID, we must create an entry in the table to reserve the token
@@ -255,6 +287,8 @@ class Cmf_Session_Handler implements iSession_Handler {
       $query->bindValue(':session_expires', self::_getExpires());
       $query->bindValue(':session_token', $token);
       $query->bindValue(':session_uuid', $uuid);
+      //$query->bindValue(':session_data', self::_encodeData(new Store));
+      $query->bindValue(':session_data', self::_encodeData($store));
       $query->bindValue(':s_id', Config::getValue('site', 'id'));
       $sessionCreated = $query->execute();
     }
@@ -268,41 +302,51 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   public static function regenerateToken () {
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
     if (self::exists() == FALSE) {
       throw new RuntimeException('Session does not exist');
     }
 
+    // Generate a new token and reserve it
     $id = self::_generateSessionId();
-    $old_token = self::$_token;
-    $new_token = $id['token'];
 
-    $query = Cmf_Database::call('cmf_session_update_token', self::Prepared_Statement_Library);
-    $query->bindValue(':old_session_token', $old_token);
-    $query->bindValue(':new_session_token', $new_token);
-    $query->bindValue(':session_uuid', self::$_uuid);
-    $query->bindValue(':s_id', Config::getValue('site', 'id'));
+    try {
+      // Update the new reserved record
+      $query = Cmf_Database::call('cmf_session_update', self::Prepared_Statement_Library);
+      $query->bindValue(':session_token', $id['token']);
+      $query->bindValue(':session_uuid', self::$_uuid);
+      $query->bindValue(':session_expires', self::_getExpires());
+      $query->bindValue(':session_data', self::_encodeData(self::$_store));
+      $query->bindValue(':s_id', Config::getValue('site', 'id'));
+      $query->execute();
 
-    if ($query->execute() == TRUE) {
-      self::$_token = $new_token;
+      // Update the previous record to redirect to the new record for the duration set in the PHP ini file for max_execution_time
+      $redirect = new Store;
+      $redirect->setValue('new_token', $id['token']);
+
+      $query = Cmf_Database::call('cmf_session_update', self::Prepared_Statement_Library);
+      $query->bindValue(':session_token', self::$_token);
+      $query->bindValue(':session_uuid', self::$_uuid);
+      $query->bindValue(':session_expires', self::$_time + ini_get('max_execution_time'));
+      $query->bindValue(':session_data', self::_encodeData($redirect));
+      $query->bindValue(':s_id', Config::getValue('site', 'id'));
+      $query->execute();
+
+      self::$_token = $id['token'];
     }
-    else {
+    catch (Exception $ex) {
       self::close();
     }
   }
 
   public static function getToken () {
+		if (self::exists() == FALSE) {
+      throw new RuntimeException('Session does not exist');
+    }
+
     return self::$_token;
   }
   
   public static function destroy () {
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
 		if (self::exists() == FALSE) {
       throw new RuntimeException('Session does not exist');
     }
@@ -317,10 +361,6 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   public static function close () {
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
 		if (self::exists() == FALSE) {
       throw new RuntimeException('Session does not exist');
     }
@@ -331,7 +371,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     // Reset variables
     self::$_token = NULL;
     self::$_uuid = NULL;
-    self::$_store = array();
+    self::$_store = NULL;
 
     self::disableWrite();
   }
@@ -355,22 +395,13 @@ class Cmf_Session_Handler implements iSession_Handler {
    * }
    */
   public static function disableWrite () {
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
     self::$_sessionWritable = FALSE;
     Event_Dispatcher::detachObservers(Response_Buffer_Event_Helper_Event::preprocess, __CLASS__ . '::write');
   }
 
   // see comments for self::disableWrite()
   public static function enableWrite () {
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
     self::$_sessionWritable = TRUE;
-
     Event_Dispatcher::attachObserver(Response_Buffer_Event_Helper_Event::preprocess, __CLASS__ . '::write');
   }
 
@@ -380,10 +411,6 @@ class Cmf_Session_Handler implements iSession_Handler {
   }
 
   public static function write () {
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
 		if (self::exists() == FALSE) {
       throw new RuntimeException('Session does not exist');
     }
@@ -398,7 +425,7 @@ class Cmf_Session_Handler implements iSession_Handler {
     $query->bindValue(':session_token', self::$_token);
     $query->bindValue(':session_uuid', self::$_uuid);
     $query->bindValue(':session_expires', self::_getExpires());
-    $query->bindValue(':session_data', base64_encode(serialize(self::$_store)));
+    $query->bindValue(':session_data', self::_encodeData(self::$_store));
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
   }
@@ -410,66 +437,29 @@ class Cmf_Session_Handler implements iSession_Handler {
     $query->execute();
   }
 
-  public static function setValue ($key, $value) {
-    Assert::isString($key);
-
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
-    self::$_store[$key] = $value;
-  }
-
-  public static function getValue ($key) {
-    Assert::isString($key);
-
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
-    if (self::valueExists($key) == FALSE) {
-      throw new Missing_Value_Exception($key);
-    }
-
-    return self::$_store[$key];
-  }
-
-  public static function valueExists ($key) {
-    Assert::isString($key);
-
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
-    return array_key_exists($key, self::$_store);
-  }
-
-  public static function deleteValue ($key) {
-    Assert::isString($key);
-
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
-
-    if (self::valueExists($key) == FALSE) {
-      throw new Missing_Value_Exception($key);
-    }
-
-    unset(self::$_store[$key]);
-  }
-
-  static public function keepAlive ($keepAlive) {
+  static public function setKeepAlive ($keepAlive) {
     Assert::isBoolean($keepAlive);
+    self::$_keepAlive = $keepAlive;
+  }
 
-    if (self::$_initialised == FALSE) {
-      throw new RuntimeException('Session is not initialised');
-    }
+  static public function getKeepAlive () {
+    return self::$_keepAlive;
+  }
 
+  static public function getStore () {
 		if (self::exists() == FALSE) {
       throw new RuntimeException('Session does not exist');
     }
 
-    self::$_keepAlive = $keepAlive;
+    return self::$_store;
+  }
+
+  static private function _encodeData ($data) {
+    return base64_encode(serialize($data));
+  }
+
+  static private function _decodeData ($data) {
+    return unserialize(base64_decode($data));
   }
 }
 
