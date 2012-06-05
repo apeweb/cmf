@@ -45,3 +45,4 @@ test.php
 # CMF files #
 #############
 cmf_startup_errors.tsv
+sites/
