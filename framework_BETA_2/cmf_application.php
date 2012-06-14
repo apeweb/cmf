@@ -204,9 +204,9 @@ final class Cmf_Application {
     // This is where part 2 of the magic happens, all modules are invoked
     Event_Dispatcher::notifyObservers(Cmf_Application_Event::execute);
 
-    $executing = FALSE;
-
     self::_phaseComplete();
+
+    $executing = FALSE;
   }
 
   /**

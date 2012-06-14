@@ -21,50 +21,41 @@ class Cmf_Menu_Link {
   public function __construct ($menuLinkProperties = array()) {
     Assert::isArray($menuLinkProperties);
 
-    // xxx should you be able to set the ID?
     if (isset($menuLinkProperties['id']) == TRUE) {
-      Assert::isInteger($menuLinkProperties['id']);
-
-      if (self::menuLinkExists($menuLinkProperties['id']) == TRUE) {
-        throw new RuntimeException("Invalid menu link id '{$menuLinkProperties['id']}' specified");
-      }
-
-      $this->_id = $menuLinkProperties['id'];
+      $this->setId(intval($menuLinkProperties['id']));
     }
 
     if (isset($menuLinkProperties['parent_id']) == TRUE) {
-      Assert::isInteger($menuLinkProperties['parent_id']);
-      $this->_parentId = $menuLinkProperties['parent_id'];
+      $this->setParentId($menuLinkProperties['parent_id']);
     }
 
     if (isset($menuLinkProperties['name']) == TRUE) {
-      Assert::isString($menuLinkProperties['name']);
-      $this->_name = $menuLinkProperties['name'];
+      $this->setName($menuLinkProperties['name']);
     }
 
     if (isset($menuLinkProperties['url']) == TRUE) {
-      Assert::isString($menuLinkProperties['url']);
-      $this->_url = $menuLinkProperties['url'];
+      $this->setUrl($menuLinkProperties['url']);
     }
 
     if (isset($menuLinkProperties['weight']) == TRUE) {
-      Assert::isInteger($menuLinkProperties['weight']);
-      $this->_weight = $menuLinkProperties['weight'];
+      $this->setWeight($menuLinkProperties['weight']);
     }
 
     if (isset($menuLinkProperties['css_class']) == TRUE) {
-      Assert::isString($menuLinkProperties['css_class']);
-      $this->_cssClass = $menuLinkProperties['css_class'];
+      $this->setCssClass($menuLinkProperties['css_class']);
     }
 
     if (isset($menuLinkProperties['tooltip']) == TRUE) {
-      Assert::isBoolean($menuLinkProperties['tooltip']);
-      $this->_tooltip = $menuLinkProperties['tooltip'];
+      $this->setTooltip($menuLinkProperties['tooltip']);
     }
 
     if (isset($menuLinkProperties['active']) == TRUE) {
-      Assert::isBoolean($menuLinkProperties['active']);
-      $this->_active = $menuLinkProperties['active'];
+      if ($menuLinkProperties['active'] == TRUE) {
+        $this->activate();
+      }
+      else {
+        $this->deactivate();
+      }
     }
   }
 
@@ -104,7 +95,11 @@ class Cmf_Menu_Link {
     return $menuLink;
   }
 
-  // You cannot set an ID once a link has been created
+  public function setId ($id) {
+    Assert::isInteger($id);
+    $this->_id = $id;
+    return $this;
+  }
 
   public function getId () {
     return $this->_id;
@@ -113,7 +108,6 @@ class Cmf_Menu_Link {
   public function setParentId ($menuLinkId) {
     Assert::isInteger($menuLinkId);
     $this->_parentId = $menuLinkId;
-    $this->_commitChanges();
     return $this;
   }
 
@@ -121,7 +115,11 @@ class Cmf_Menu_Link {
     return $this->_parentId;
   }
 
-  // To set the menu id you need to use the Cmf_Menu class
+  public function setMenuId ($menuId) {
+    Assert::isInteger($menuId);
+    $this->_menuId = $menuId;
+    return $this;
+  }
 
   public function getMenuId () {
     return $this->_menuId;
@@ -130,7 +128,6 @@ class Cmf_Menu_Link {
   public function setName ($name) {
     Assert::isString($name);
     $this->_name = $name;
-    $this->_commitChanges();
     return $this;
   }
 
@@ -141,7 +138,6 @@ class Cmf_Menu_Link {
   public function setUrl ($url) {
     Assert::isString($url);
     $this->_url = $url;
-    $this->_commitChanges();
     return $this;
   }
 
@@ -152,7 +148,6 @@ class Cmf_Menu_Link {
   public function setWeight ($weight) {
     Assert::isInteger($weight);
     $this->_weight = $weight;
-    $this->_commitChanges();
     return $this;
   }
 
@@ -163,7 +158,6 @@ class Cmf_Menu_Link {
   public function setCssClass ($cssClass) {
     Assert::isString($cssClass);
     $this->_cssClass = $cssClass;
-    $this->_commitChanges();
   }
 
   public function getCssClass () {
@@ -173,7 +167,6 @@ class Cmf_Menu_Link {
   public function setTooltip ($tooltip) {
     Assert::isString($tooltip);
     $this->_tooltip = $tooltip;
-    $this->_commitChanges();
   }
 
   public function getTooltip () {
@@ -182,12 +175,10 @@ class Cmf_Menu_Link {
 
   public function activate () {
     $this->_active = TRUE;
-    $this->_commitChanges();
   }
 
   public function deactivate () {
     $this->_active = FALSE;
-    $this->_commitChanges();
   }
 
   public function isActive () {
@@ -201,8 +192,7 @@ class Cmf_Menu_Link {
     $query->execute();
   }
 
-  // xxx shouldn't assume changes should be saved
-  protected function _commitChanges () {
+  public function save () {
     $query = Cmf_Database::call('cmf_menu_link_update', self::Prepared_Statement_Library);
     $query->bindValue(':mnl_parent_id', $this->_parentId);
     $query->bindValue(':mnl_name', $this->_name);

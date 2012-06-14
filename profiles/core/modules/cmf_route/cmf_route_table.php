@@ -127,8 +127,8 @@ class Cmf_Route_Table {
           $controller = $controllerFactory->normaliseControllerName($route->getArgumentValue('controller'));
           $action = $route->getArgumentValue('action');
 
-          // Check if controller exists
-          if (Cmf_Controller_Cache::controllerExists($controller) == FALSE) {
+          // Check if controller exists, not all routes specify a default controller so we check for this first
+          if ($controller == '' || Cmf_Controller_Cache::controllerExists($controller) == FALSE) {
             continue;
           }
 

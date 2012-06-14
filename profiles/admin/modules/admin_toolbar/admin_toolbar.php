@@ -16,32 +16,15 @@ class Admin_Toolbar {
     Event_Dispatcher::attachObserver(Cmf_Template_Engine_Event::buildContent, __CLASS__ . '::buildNavigationBar');
   }
 
-  // xxx need to be site & user specific
   public static function buildSystemLinks () {
-    // $systemLinks = new Cmf_Menu_Control;
-    // $systemLinks->setMenu('administration_system_links');
-    // $systemLinks->renderCallback = 'Admin_Toolbar::renderSystemLinks';
-    View_Data::setValue('system_links', '<a href="/admin/">Dashboard</a> | <a href="/">Homepage</a> | <a href="/admin/settings/">Settings</a> | <a href="/admin/tools/">Tools</a> | <a href="?action=logout">Log Out</a>');
+    $systemLinks = new Cmf_Menu_Control;
+    $systemLinks->setMenu(Cmf_Menu::getMenuByName('Admin System Links'));
+    View_Data::setValue('system_links', $systemLinks);
   }
 
   public static function buildNavigationBar () {
     $navigationBar = new Cmf_Menu_Control;
-
-    // xxx specifying id 2 here breaks things, need blocks or something to fix this issue so that we specify which menu to use in the block and the value is stored in the DB
-    switch (Config::getValue('site', 'id')) {
-      case 1:
-        $menuId = 1;
-      break;
-
-      case 2:
-        $menuId = 2;
-      break;
-
-      default:
-        $menuId = 0;
-    }
-
-    $navigationBar->setMenu(Cmf_Menu::getMenu($menuId));
+    $navigationBar->setMenu(Cmf_Menu::getMenuByName('Admin Menu'));
     View_Data::setValue('navigation_bar', $navigationBar);
   }
 
@@ -85,6 +68,20 @@ class Admin_Toolbar {
     $html .= '</ul>';
 
     return $html;
+  }
+
+  public static function renderSystemLinks (Cmf_Menu_Control $menu) {
+    $menu->setContent(self::_renderSystemLinks($menu->getMenu()->getLinks()));
+  }
+
+  protected static function _renderSystemLinks ($links) {
+    $html = '';
+
+    foreach ($links as $link) {
+      $html .= '<a href="' . $link['url'] . '">' . $link['name'] . '</a> | ';
+    }
+
+    return trim($html, '| ');
   }
 }
 

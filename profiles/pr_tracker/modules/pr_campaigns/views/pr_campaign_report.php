@@ -14,7 +14,7 @@ if (count(debug_backtrace()) == 0) {
   function drawOverviewVisualization() {
     // Create and populate the data table.
     var data = google.visualization.arrayToDataTable([
-      ['Month', 'Quality', 'Relevant'],
+      ['Month', 'Quality', 'Relevance'],
       ['Jan',   8,         6],
       ['Feb',   7.4,       5],
       ['Mar',   4,         6.6],
@@ -35,7 +35,7 @@ if (count(debug_backtrace()) == 0) {
                     height: 300,
                     vAxis: {maxValue: 10},
                     backgroundColor: 'transparent',
-                    theme: {chartArea: {width: '78%', top:10, left:20}}
+                    theme: {chartArea: {width: '84%', top:10, left:20}}
                    }
             );
   }
@@ -73,7 +73,7 @@ if (count(debug_backtrace()) == 0) {
     drawOverviewVisualization();
     drawMatchesVisualization();
   };
-
+ 
   google.setOnLoadCallback(drawOverviewVisualization);
   google.setOnLoadCallback(drawMatchesVisualization);
 </script>
@@ -85,10 +85,10 @@ if (count(debug_backtrace()) == 0) {
         <tbody>
           <tr>
             <td style="width:50%;">
-              <h1 class="dashboard">Dashboard</h1>
+              <h1 class="package">Castrol Sponsors Major League Soccer Report</h1>
             </td>
             <td align="right">
-              
+              Jan 2011 - Dec 2011 <a href="">change</a>
             </td>
           </tr>
         </tbody>
@@ -98,8 +98,8 @@ if (count(debug_backtrace()) == 0) {
 
     <div class="chart_wrapper">
       <h2>Overview</h2>
-      <div class="chart" id="overview" style="float:left; width:50%; height:230px; overflow:hidden"></div>
-      <div class="chart" id="matches" style="float:left; width:50%; height:230px; overflow:hidden"></div>
+      <div class="chart" id="overview" style="float:left; width:50%; position:relative; height:230px; overflow:hidden"></div>
+      <div class="chart" id="matches" style="float:left; width:50%; position:relative; height:230px; overflow:hidden"></div>
     </div>
 
     <h2>Matches</h2>
@@ -109,7 +109,6 @@ if (count(debug_backtrace()) == 0) {
           <tr>
             <th><a href="?sort=web_page" title="Sort by web page">Web Page</a></th>
             <th><a href="?sort=quality" title="Sort by quality">Quality</a></th>
-            <th><a href="?sort=quality" title="Sort by relevance">Relevance</a></th>
             <th><a href="?sort=match" title="Sort by match">Match</a></th>
             <th><a href="?sort=location" title="Sort by location">Location</a></th>
             <th><a href="?sort=date_discovered" title="Sort by date found">Date Discovered</a></th>
@@ -120,8 +119,7 @@ if (count(debug_backtrace()) == 0) {
           <tr>
             <td><a href="/admin/monitors/match/1">eon.businesswire.com/news/eon/20100510005316/en</a></td>
             <td><a href="/admin/monitors/match/1">56%</a></td>
-            <td><a href="/admin/monitors/match/1">Yes</a></td>
-            <td><a href="/admin/monitors/match/1">Full</a></td>
+            <td><a href="/admin/monitors/match/1">79%</a></td>
             <td><a href="/admin/monitors/match/1">US</a></td>
             <td><a href="/admin/monitors/match/1">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/1">High</a></td>
@@ -129,8 +127,7 @@ if (count(debug_backtrace()) == 0) {
           <tr>
             <td><a href="/admin/monitors/match/2">www.nysportsjournalism.com/castrol-scores-deal-51110/</a></td>
             <td><a href="/admin/monitors/match/2">69%</a></td>
-            <td><a href="/admin/monitors/match/1">Yes</a></td>
-            <td><a href="/admin/monitors/match/2">Full</a></td>
+            <td><a href="/admin/monitors/match/2">88%</a></td>
             <td><a href="/admin/monitors/match/2">US</a></td>
             <td><a href="/admin/monitors/match/2">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/2">Some</a></td>
@@ -138,8 +135,7 @@ if (count(debug_backtrace()) == 0) {
           <tr>
             <td><a href="/admin/monitors/match/3">eon.businesswire.com/news/eon/20100510005316/en</a></td>
             <td><a href="/admin/monitors/match/3">56%</a></td>
-            <td><a href="/admin/monitors/match/1">Yes</a></td>
-            <td><a href="/admin/monitors/match/3">Full</a></td>
+            <td><a href="/admin/monitors/match/3">79%</a></td>
             <td><a href="/admin/monitors/match/3">US</a></td>
             <td><a href="/admin/monitors/match/3">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/3">High</a></td>
@@ -147,17 +143,15 @@ if (count(debug_backtrace()) == 0) {
           <tr>
             <td><a href="/admin/monitors/match/4">www.nysportsjournalism.com/castrol-scores-deal-51110/</a></td>
             <td><a href="/admin/monitors/match/4">69%</a></td>
-            <td><a href="/admin/monitors/match/1">Yes</a></td>
-            <td><a href="/admin/monitors/match/4">Partial</a></td>
-            <td><a href="/admin/monitors/match/4">UK</a></td>
+            <td><a href="/admin/monitors/match/4">88%</a></td>
+            <td><a href="/admin/monitors/match/4">US</a></td>
             <td><a href="/admin/monitors/match/4">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/4">Some</a></td>
           </tr>
           <tr>
             <td><a href="/admin/monitors/match/5">eon.businesswire.com/news/eon/20100510005316/en</a></td>
             <td><a href="/admin/monitors/match/5">56%</a></td>
-            <td><a href="/admin/monitors/match/1">Yes</a></td>
-            <td><a href="/admin/monitors/match/5">Full</a></td>
+            <td><a href="/admin/monitors/match/5">79%</a></td>
             <td><a href="/admin/monitors/match/5">US</a></td>
             <td><a href="/admin/monitors/match/5">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/5">High</a></td>
@@ -165,17 +159,15 @@ if (count(debug_backtrace()) == 0) {
           <tr>
             <td><a href="/admin/monitors/match/6">www.nysportsjournalism.com/castrol-scores-deal-51110/</a></td>
             <td><a href="/admin/monitors/match/6">69%</a></td>
-            <td><a href="/admin/monitors/match/1">Yes</a></td>
-            <td><a href="/admin/monitors/match/6">Full</a></td>
-            <td><a href="/admin/monitors/match/6">UK</a></td>
+            <td><a href="/admin/monitors/match/6">88%</a></td>
+            <td><a href="/admin/monitors/match/6">US</a></td>
             <td><a href="/admin/monitors/match/6">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/6">Some</a></td>
           </tr>
           <tr>
             <td><a href="/admin/monitors/match/7">eon.businesswire.com/news/eon/20100510005316/en</a></td>
             <td><a href="/admin/monitors/match/7">56%</a></td>
-            <td><a href="/admin/monitors/match/1">Yes</a></td>
-            <td><a href="/admin/monitors/match/7">Full</a></td>
+            <td><a href="/admin/monitors/match/7">79%</a></td>
             <td><a href="/admin/monitors/match/7">US</a></td>
             <td><a href="/admin/monitors/match/7">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/7">High</a></td>
@@ -183,17 +175,15 @@ if (count(debug_backtrace()) == 0) {
           <tr>
             <td><a href="/admin/monitors/match/8">www.nysportsjournalism.com/castrol-scores-deal-51110/</a></td>
             <td><a href="/admin/monitors/match/8">69%</a></td>
-            <td><a href="/admin/monitors/match/1">Yes</a></td>
-            <td><a href="/admin/monitors/match/8">Full</a></td>
-            <td><a href="/admin/monitors/match/8">UK</a></td>
+            <td><a href="/admin/monitors/match/8">88%</a></td>
+            <td><a href="/admin/monitors/match/8">US</a></td>
             <td><a href="/admin/monitors/match/8">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/8">Some</a></td>
           </tr>
           <tr>
             <td><a href="/admin/monitors/match/9">eon.businesswire.com/news/eon/20100510005316/en</a></td>
-            <td><a href="/admin/monitors/match/9">36%</a></td>
-            <td><a href="/admin/monitors/match/1">No</a></td>
-            <td><a href="/admin/monitors/match/9">Partial</a></td>
+            <td><a href="/admin/monitors/match/9">56%</a></td>
+            <td><a href="/admin/monitors/match/9">79%</a></td>
             <td><a href="/admin/monitors/match/9">US</a></td>
             <td><a href="/admin/monitors/match/9">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/9">High</a></td>
@@ -201,9 +191,8 @@ if (count(debug_backtrace()) == 0) {
           <tr>
             <td><a href="/admin/monitors/match/10">www.nysportsjournalism.com/castrol-scores-deal-51110/</a></td>
             <td><a href="/admin/monitors/match/10">69%</a></td>
-            <td><a href="/admin/monitors/match/1">Yes</a></td>
-            <td><a href="/admin/monitors/match/10">Full</a></td>
-            <td><a href="/admin/monitors/match/10">UK</a></td>
+            <td><a href="/admin/monitors/match/10">88%</a></td>
+            <td><a href="/admin/monitors/match/10">US</a></td>
             <td><a href="/admin/monitors/match/10">2012-05-24</a></td>
             <td><a href="/admin/monitors/match/10">Some</a></td>
           </tr>
@@ -222,7 +211,7 @@ if (count(debug_backtrace()) == 0) {
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           </td>
           <td valign="bottom" align="right">
-
+            
           </td>
         </tr>
       </tbody>

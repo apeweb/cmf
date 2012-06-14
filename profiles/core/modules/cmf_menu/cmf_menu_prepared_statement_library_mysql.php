@@ -7,9 +7,30 @@ if (count(debug_backtrace()) == 0) {
 
 class Cmf_Menu_Prepared_Statement_Library_Mysql {
   const CMF_MENU_GET = "
-    SELECT mn_name, mn_render_callback
+    SELECT mn_id, mn_name, mn_render_callback
       FROM cmf_menu
       WHERE mn_id = :mn_id
+      AND mn_active = '1'
+      AND mn_deleted = '0'
+      AND s_id = :s_id
+      LIMIT 1
+  ";
+
+  const CMF_MENU_GET_ALL = "
+    SELECT
+      mn_id AS id,
+      mn_name AS name,
+      mn_render_callback AS render_callback
+      FROM cmf_menu
+      WHERE mn_active = :mn_active
+      AND mn_deleted = '0'
+      AND s_id = :s_id
+  ";
+
+  const CMF_MENU_GET_BY_NAME = "
+    SELECT mn_id, mn_name, mn_render_callback
+      FROM cmf_menu
+      WHERE mn_name = :mn_name
       AND mn_active = '1'
       AND mn_deleted = '0'
       AND s_id = :s_id

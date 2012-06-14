@@ -23,7 +23,7 @@ if (count(debug_backtrace()) == 0) {
             <tbody>
               <tr>
                 <td style="width:50%;">
-                  <h1 class="package"><?=View_Data::getValue('menu_name');?></h1>
+                  <h1 class="package"><?=View_Data::getValue('page', 'title');?></h1>
                 </td>
                 <td align="right">
                   <a href="/admin/menus/" class="form-button back"><span>Back</span></a>
@@ -61,7 +61,7 @@ if (count(debug_backtrace()) == 0) {
                 <tr>
                   <th>Title</th>
                   <th>URL</th>
-                  <th>Weight</th>
+                  <!--<th>Weight</th>-->
                   <th>Active</th>
                   <th width="150">Actions</th>
                 </tr>

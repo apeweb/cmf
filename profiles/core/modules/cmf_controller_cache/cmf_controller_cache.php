@@ -185,7 +185,9 @@ class Cmf_Controller_Cache {
   }
 
   public static function clearCache () {
-    Cmf_Database::call('cmf_controller_cache_truncate', self::Prepared_Statement_Library)->execute();
+    $query = Cmf_Database::call('cmf_controller_cache_truncate', self::Prepared_Statement_Library);
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
+    $query->execute();
     Config::setValue(CMF_REGISTRY, 'cache', 'controller', 'built', FALSE);
   }
 

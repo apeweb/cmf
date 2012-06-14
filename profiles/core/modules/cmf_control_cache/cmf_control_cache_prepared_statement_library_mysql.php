@@ -7,7 +7,8 @@ if (count(debug_backtrace()) == 0) {
 
 class Cmf_Control_Cache_Prepared_Statement_Library_Mysql {
   const CMF_CONTROL_CACHE_TRUNCATE = "
-    TRUNCATE TABLE cmf_controls_cache
+    DELETE FROM cmf_controls_cache
+      WHERE s_id = :s_id
   ";
 
   const CMF_CONTROL_CACHE_ADD = "

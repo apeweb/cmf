@@ -9,6 +9,10 @@ class Http_Error_Controller extends Controller {
   public static function pageNotFound () {
     Cmf_Template_Engine::setMasterTemplate(CMF_ROOT . 'profiles/shared/views/page_not_found' . PHP_EXT);
   }
+
+  public static function badRequest () {
+    Cmf_Template_Engine::setMasterTemplate(CMF_ROOT . 'profiles/shared/views/bad_request' . PHP_EXT);
+  }
 }
 
 ?>

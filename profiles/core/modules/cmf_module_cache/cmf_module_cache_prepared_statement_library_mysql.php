@@ -8,7 +8,8 @@ if (count(debug_backtrace()) == 0) {
 define('Cmf_Controller_Cache_Prepared_Statement_Library_Mysql', 'Cmf_Controller_Cache_Prepared_Statement_Library_Mysql');
 class Cmf_Module_Cache_Prepared_Statement_Library_Mysql {
   const CMF_MODULE_CACHE_TRUNCATE = "
-    TRUNCATE TABLE cmf_modules
+    DELETE FROM cmf_modules
+      WHERE s_id = :s_id
   ";
 
   const CMF_MODULE_CACHE_ADD = "

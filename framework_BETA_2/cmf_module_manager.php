@@ -19,6 +19,7 @@ class Cmf_Module_Manager {
         $paths[$module['m_path']] = $module['m_path'];
 
         // xxx include subfolders too, this is important if a module is a library of classes that don't do anything by themselves
+        // xxx also should probably include subfolders in case modules house child modules which can be used to extend them
         // there are pros and cons of doing so, such as if we do so then we are performing lots of stats on the filesystem
       }
     }

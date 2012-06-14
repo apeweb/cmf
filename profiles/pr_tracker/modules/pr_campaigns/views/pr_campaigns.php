@@ -40,10 +40,10 @@ if (count(debug_backtrace()) == 0) {
         <tbody>
           <tr>
             <td style="width:50%;">
-              <h1 class="package">PR Campaigns</h1>
+              <h1 class="package">Monitors</h1>
             </td>
             <td align="right">
-              <a href="/admin/campaigns/add" class="form-button add"><span>New PR Campaign</span></a>
+              <a href="/admin/monitors/add" class="form-button add"><span>New Monitor</span></a>
             </td>
           </tr>
         </tbody>
@@ -91,10 +91,10 @@ if (count(debug_backtrace()) == 0) {
               <td class="checkcolumn">
                 <input type="checkbox" name="toggle" />
               </td>
-              <td><a href="/admin/campaigns/view/<?=$campaign->getId()?>"><?=$campaign->getName()?></a></td>
-              <td><a href="/admin/campaigns/view/<?=$campaign->getId()?>"><?=$campaign->getDateStarted()?></a></td>
-              <td><a href="/admin/campaigns/view/<?=$campaign->getId()?>"><?=$campaign->getName()?></a></td>
-              <td class="actions"><a href="/admin/campaigns/delete<?=$campaign->getId()?>" title="Delete" class="delete"><img src="/themes/admin/images/mini-icons/delete.png" alt="Delete" /></a> &nbsp; <a href="/admin/campaigns/edit/<?=$campaign->getId()?>" title="Edit"><img src="/themes/admin/images/mini-icons/edit.png" alt="Edit" /></a></td>
+              <td><a href="/admin/monitors/view/<?=$campaign->getId()?>"><?=$campaign->getName()?></a></td>
+              <td><a href="/admin/monitors/view/<?=$campaign->getId()?>"><?=$campaign->getDateStarted()?></a></td>
+              <td><a href="/admin/monitors/view/<?=$campaign->getId()?>"><?=$campaign->getStatus()?></a></td>
+              <td class="actions"><a href="/admin/monitors/delete/<?=$campaign->getId()?>" title="Delete" class="delete"><img src="/themes/admin/images/mini-icons/delete.png" alt="Delete" /></a> &nbsp; <a href="/admin/monitors/edit/<?=$campaign->getId()?>" title="Edit"><img src="/themes/admin/images/mini-icons/edit.png" alt="Edit" /></a></td>
             </tr>
           <?php endforeach; ?>
         </tbody>

@@ -217,7 +217,9 @@ class Cmf_Module_Cache {
   }
 
   public static function clearCache () {
-    Cmf_Database::call('cmf_module_cache_truncate', self::Prepared_Statement_Library)->execute();
+    $query = Cmf_Database::call('cmf_module_cache_truncate', self::Prepared_Statement_Library);
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
+    $query->execute();
     Config::setValue(CMF_REGISTRY, 'cache', 'module', 'built', FALSE);
   }
 

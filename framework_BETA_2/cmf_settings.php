@@ -213,6 +213,7 @@ class Cmf_Settings {
   static public function runSiteSettingsDiagnostic () {
     $response = new Response;
     $response->redirect(self::_getInstallUrl());
+    exit;
   }
 
   static public function _getInstallUrl () {

@@ -11,32 +11,24 @@ if (count(debug_backtrace()) == 0) {
 class Cmf_Menu {
   protected $_id = NULL;
   protected $_name = NULL;
+  protected $_type = NULL;
   protected $_renderCallback = NULL;
 
   const Prepared_Statement_Library = 'cmf_menu_prepared_statement_library';
 
-  // xxx create new menu
   public function __construct ($menuProperties = array()) {
     Assert::isArray($menuProperties);
 
     if (isset($menuProperties['id']) == TRUE) {
-      Assert::isInteger($menuProperties['id']);
-
-      if (self::menuExists($menuProperties['id']) == TRUE) {
-        throw new RuntimeException("Invalid menu id '{$menuProperties['id']}' specified");
-      }
-
-      $this->_id = $menuProperties['id'];
+      $this->setId(intval($menuProperties['id']));
     }
 
     if (isset($menuProperties['name']) == TRUE) {
-      Assert::isString($menuProperties['name']);
-      $this->_name = $menuProperties['name'];
+      $this->setName($menuProperties['name']);
     }
 
     if (isset($menuLinkProperties['render_callback']) == TRUE) {
-      Assert::isString($menuLinkProperties['render_callback']);
-      $this->_renderCallback = $menuLinkProperties['render_callback'];
+      $this->setRenderCallback($menuLinkProperties['render_callback']);
     }
   }
 
@@ -63,11 +55,39 @@ class Cmf_Menu {
     }
 
     $menu = new self;
-    $menu->_id = $id;
+    $menu->_id = $row['mn_id'];
     $menu->_name = $row['mn_name'];
     $menu->_renderCallback = $row['mn_render_callback'];
 
     return $menu;
+  }
+
+  public static function getMenuByName ($name) {
+    Assert::isString($name);
+
+    $query = Cmf_Database::call('cmf_menu_get_by_name', self::Prepared_Statement_Library);
+    $query->bindValue(':mn_name', $name);
+    $query->bindValue(':s_id', Config::getValue('site', 'id'));
+    $query->execute();
+
+    $row = $query->fetch();
+
+    if ($row == FALSE) {
+      throw new RuntimeException("Menu with the name '{$name}' could not be found");
+    }
+
+    $menu = new self;
+    $menu->_id = $row['mn_id'];
+    $menu->_name = $row['mn_name'];
+    $menu->_renderCallback = $row['mn_render_callback'];
+
+    return $menu;
+  }
+
+  public function setId ($id) {
+    Assert::isInteger($id);
+    $this->_id = $id;
+    return $this;
   }
 
   public function getId () {
@@ -77,7 +97,6 @@ class Cmf_Menu {
   public function setName ($name) {
     Assert::isString($name);
     $this->_name = $name;
-    $this->_commitChanges();
     return $this;
   }
 
@@ -85,10 +104,20 @@ class Cmf_Menu {
     return $this->_name;
   }
 
+  // A friendly name for the type of navigation
+  public function setType ($type) {
+    Assert::isString($type);
+    $this->_type = $type;
+    return $type;
+  }
+
+  public function getType () {
+    return $this->_type;
+  }
+
   public function setRenderCallback ($renderCallback) {
     Assert::isString($renderCallback);
     $this->_renderCallback = $renderCallback;
-    $this->_commitChanges();
     return $this;
   }
 
@@ -97,23 +126,24 @@ class Cmf_Menu {
   }
 
   // returns a tree array of menu links
-  public function getLinks ($activeOnly = TRUE, $refresh = FALSE) {
-    Assert::isBoolean($activeOnly);
+  public function getLinks ($active = TRUE, $refresh = FALSE) {
+    Assert::isBoolean($active, TRUE);
     Assert::isBoolean($refresh);
 
     static $menuLinks = NULL;
     $refs = array();
 
-    if (isset($menuLinks[$activeOnly]) && $refresh == FALSE) {
-      return $menuLinks[$activeOnly];
+    if (isset($menuLinks[$this->_id][$active]) && $refresh == FALSE) {
+      return $menuLinks[$this->_id][$active];
     }
 
-    if ($activeOnly) {
+    if ($active) {
       $query = Cmf_Database::call('cmf_menu_get_active_links', self::Prepared_Statement_Library);
     }
     else {
       $query = Cmf_Database::call('cmf_menu_get_all_links', self::Prepared_Statement_Library);
     }
+
     $query->bindValue(':mn_id', $this->_id);
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
@@ -134,29 +164,47 @@ class Cmf_Menu {
       }
 
       if ($data['mnl_parent_id'] == 0) {
-        $menuLinks[$activeOnly][$data['mnl_id']] = &$ref;
+        $menuLinks[$this->_id][$active][$data['mnl_id']] = &$ref;
       }
       else {
         $refs[$data['mnl_parent_id']]['children'][$data['mnl_id']] = &$ref;
       }
     }
 
-    // xxx call a hook so that links can be messed with
+    // xxx trigger an event so that links can be messed with
 
-    return $menuLinks[$activeOnly];
+    return $menuLinks[$this->_id][$active];
   }
 
-  public function addLink (Cmf_Menu_Link $menuLink) {
+  public function addLink (Cmf_Menu_Link $cmfMenuLink) {
+    // xxx finish
     $query = Cmf_Database::call('cmf_menu_add_link', self::Prepared_Statement_Library);
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
     return $this;
   }
 
-  // to delete a link you need to delete the actual link itself
+  public function removeLink (Cmf_Menu_Link $cmfMenuLink) {
+    // xxx finish
+  }
 
-  protected function _commitChanges () {
-    // xxx finish, will save changes to menu with the exception of adding new links
+  public function save () {
+    if ($this->_id === NULL) {
+      $query = Cmf_Database::call('xxx', self::Prepared_Statement_Library);
+      // xxx finish
+      $query->bindValue(':s_id', Config::getValue('site', 'id'));
+      $query->execute();
+    }
+    else {
+      $query = Cmf_Database::call('xxx', self::Prepared_Statement_Library);
+      // xxx finish
+      $query->bindValue(':s_id', Config::getValue('site', 'id'));
+      $query->execute();
+    }
+
+    // xxx update the links
+
+    return $this;
   }
 }
 

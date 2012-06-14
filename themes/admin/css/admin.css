@@ -39,7 +39,7 @@ h1.creditcards {
   background-image: url(/themes/admin/images/mini-icons/creditcards.png);
 }
 
-.left.single_column h2 {
+h2, .left.single_column h2 {
   font: bold 13px/1.5em Tahoma,Verdana,Helvetica,sans-serif;
   margin-top: 7px;
 }
@@ -791,6 +791,10 @@ p .dragHandle {
   background-image: url(/themes/admin/images/mini-icons/chart-pie.png);
 }
 
+.navigation_bar .level_0 span.report {
+  background-image: url(/themes/admin/images/mini-icons/report.png);
+}
+
 .navigation_bar .level_0 ul span {
   background: none !important;
 }
@@ -873,6 +877,10 @@ p .dragHandle {
 
 .navigation_bar .hovering ul a.rainbow {
   background-image: url(/themes/admin/images/mini-icons/rainbow.png);
+}
+
+.navigation_bar .hovering ul a.report {
+  background-image: url(/themes/admin/images/mini-icons/report.png);
 }
 
 /** tree CSS **/

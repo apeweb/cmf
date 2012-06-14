@@ -20,7 +20,7 @@ class Pr_Campaign implements iCmf_List, iCmf_List_Item {
     Assert::isArray($prCampaignProperties);
 
     if (isset($prCampaignProperties['id']) == TRUE) {
-      $this->_setId($prCampaignProperties['id']);
+      $this->setId(intval($prCampaignProperties['id']));
     }
 
     if (isset($prCampaignProperties['name']) == TRUE) {
@@ -48,10 +48,12 @@ class Pr_Campaign implements iCmf_List, iCmf_List_Item {
   // Get an existing campaign from the DB
   static public function getPrCampaign ($id, $active = TRUE) {
     Assert::isInteger($id);
+    Assert::isBoolean($active);
 
     $query = Cmf_Database::call('pr_campaigns_get_campaign', self::Prepared_Statement_Library);
     $query->bindValue(':prtc_id', $id);
     $query->bindValue(':prtc_active', $active);
+    $query->bindValue(':prtcs_active', $active);
     $query->bindValue(':s_id', Config::getValue('site', 'id'));
     $query->execute();
 
@@ -78,8 +80,10 @@ class Pr_Campaign implements iCmf_List, iCmf_List_Item {
     return (bool) $query->fetchColumn();
   }
 
-  private function _setId ($id) {
-    $this->_id = intval($id);
+  public function setId ($id) {
+    Assert::isInteger($id);
+    $this->_id = $id;
+    return $this;
   }
 
   public function getId () {
@@ -89,6 +93,7 @@ class Pr_Campaign implements iCmf_List, iCmf_List_Item {
   public function setName ($name) {
     Assert::isString($name);
     $this->_name = $name;
+    return $this;
   }
 
   public function getName () {
@@ -98,6 +103,7 @@ class Pr_Campaign implements iCmf_List, iCmf_List_Item {
   public function setDateStarted ($dateStarted) {
     Assert::isString($dateStarted);
     $this->_dateStarted = $dateStarted;
+    return $this;
   }
 
   public function getDateStarted () {
@@ -107,6 +113,7 @@ class Pr_Campaign implements iCmf_List, iCmf_List_Item {
   public function setStatus ($status) {
     Assert::isString($status);
     $this->_status = $status;
+    return $this;
   }
 
   public function getStatus () {
@@ -123,6 +130,8 @@ class Pr_Campaign implements iCmf_List, iCmf_List_Item {
     }
 
     $this->_keyMessages[$keyMessage->getId()] = $keyMessage;
+
+    return $this;
   }
 
   private function _isKeyMessageInUse ($id) {
@@ -146,18 +155,21 @@ class Pr_Campaign implements iCmf_List, iCmf_List_Item {
    * $keyMessage = Pr_Campaign_Key_Message::getKeyMessage(2);
    * $prCampaign = Pr_Campaign::getPrCampaign();
    * $prCampaign->removeKeyMessage($keyMessage);
-   * $keyMessage->delete(); // Not doing so won't break anything but will orphan the key message
+   * $keyMessage->delete(); // Not doing so won't break anything but will orphan the key message and cause the db to fill up with junk
    */
   public function removeKeyMessage (Pr_Campaign_Key_Message $keyMessage) {
     unset($this->_keyMessages[$keyMessage->getId()]);
+    return $this;
   }
 
   public function activate () {
     $this->_active = TRUE;
+    return $this;
   }
 
   public function deactivate () {
     $this->_active = FALSE;
+    return $this;
   }
 
   public function isActive () {
@@ -188,6 +200,8 @@ class Pr_Campaign implements iCmf_List, iCmf_List_Item {
     if ($this->_keyMessages !== NULL) {
       // xxx update key messages
     }
+
+    return $this;
   }
 
   // Delete the campaign
