@@ -7,6 +7,7 @@ if (count(debug_backtrace()) == 0) {
 
 final class Cmf_Route_Table_Event extends Enum {
   const registerRoutes = 'Cmf_Route_Table_Event::registerRoutes';
+  const rewriteRequestPath = 'Cmf_Route_Table_Event::rewriteRequestPath';
   const rewriteActiveRoute = 'Cmf_Route_Table_Event::rewriteActiveRoute';
 }
 
