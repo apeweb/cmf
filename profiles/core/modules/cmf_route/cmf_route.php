@@ -47,18 +47,26 @@ class Cmf_Route {
     $this->_url = $url;
   }
 
-  public function getUrl ($arguments = array()) {
-    $url = $this->_url;
+  public function getUrl ($arguments = array(), $parse = TRUE) {
+    if ($parse == TRUE) {
+      $url = $this->_url;
 
-    foreach ($arguments as $argumentName => $argumentValue) {
-      $url = str_replace('{' . $argumentName. '}', $argumentValue, $url);
+      foreach ($arguments as $argumentName => $argumentValue) {
+        if ($argumentValue !== '') {
+          $url = str_replace('{' . $argumentName. '}', $argumentValue, $url);
+        }
+      }
+
+      foreach ($this->_defaultValues as $argumentName => $argumentValue) {
+        if ($argumentValue !== '') {
+          $url = str_replace('{' . $argumentName. '}', $argumentValue, $url);
+        }
+      }
+
+      return $url;
     }
 
-    foreach ($this->_defaultValues as $argumentName => $argumentValue) {
-      $url = str_replace('{' . $argumentName. '}', $argumentValue, $url);
-    }
-
-    return $url;
+    return $this->_url;
   }
 
   /**
@@ -124,18 +132,19 @@ class Cmf_Route {
     return $this->_masks;
   }
 
-  // returns #^[^/.,;?\n]+/[^/.,;?\n]+/\d+$#uD
   public function getUrlMask () {
     $expression = preg_replace('#[.\\+*?[^\\]$<>=!|]#', '\\\\$0', $this->_url);
 
     foreach ($this->_defaultValues as $name => $mask) {
       //$expression = str_replace('{' . $name . '}', '(?:{' . $name . '})?', $expression);
-      $expression = str_replace('/{' . $name . '}', '/?(?:{' . $name . '})?', $expression);
+      //$expression = str_replace('/{' . $name . '}', '/?(?:{' . $name . '})?', $expression);
+      $expression = preg_replace('#/{' . $name . '}(.*)#', '(/{' . $name . '}?\\1)?', $expression);
     }
+    $expression .= '/?';
 
     foreach ($this->_masks as $name => $mask) {
       if ($mask == '') {
-        $mask = '[^/.,;?\n]+/?';
+        $mask = '[^/.,;?\n]+';
       }
       $expression = str_replace('{' . $name . '}', '(?P<' . $name . '>' . $mask . ')', $expression);
     }
@@ -155,7 +164,12 @@ class Cmf_Route {
       return $this->_arguments;
     }
 
-    if (preg_match($this->getUrlMask(), Request::path(), $matches) == FALSE) {
+    $routeRequest = new Event_Data;
+    $routeRequest->path = Request::path();
+
+    Event_Dispatcher::notifyObservers(Cmf_Route_Table_Event::rewriteRequestPath, $routeRequest);
+
+    if (preg_match($this->getUrlMask(), $routeRequest->path, $matches) == FALSE) {
       $this->_arguments = array();
       return $this->_arguments;
     }

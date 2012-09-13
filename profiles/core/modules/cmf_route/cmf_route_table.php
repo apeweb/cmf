@@ -106,6 +106,9 @@ class Cmf_Route_Table {
     $controllerFactory->createController($route);
   }
 
+  // xxx the first argument should be a Request object
+  // xxx or if not supplied should default to Application_Context::getCurrentContext()->getRequest())
+  // xxx to make it context aware
   public static function getActiveRoute ($reset = FALSE) {
     static $route = NULL;
 
@@ -114,21 +117,33 @@ class Cmf_Route_Table {
     }
 
     $controllerFactory = Controller_Builder::getControllerFactory();
-    $path = Request::path();
+    $routeRequest = new Event_Data;
+    $routeRequest->path = Request::path();
+
+    Event_Dispatcher::notifyObservers(Cmf_Route_Table_Event::rewriteRequestPath, $routeRequest);
 
     foreach (self::$_routeCollection->getAllRoutes() as $route) {
       // Check to see if the route mask matches our path
-      if (preg_match($route->getUrlMask(), $path) == TRUE) {
+      if (preg_match($route->getUrlMask(), $routeRequest->path) == TRUE) {
         try {
           // Get route aliases
           Event_Dispatcher::notifyObservers(Cmf_Route_Table_Event::rewriteActiveRoute, $route);
 
-          // Normalise controller name
-          $controller = $controllerFactory->normaliseControllerName($route->getArgumentValue('controller'));
+          $controller = $route->getArgumentValue('controller');
           $action = $route->getArgumentValue('action');
 
-          // Check if controller exists, not all routes specify a default controller so we check for this first
-          if ($controller == '' || Cmf_Controller_Cache::controllerExists($controller) == FALSE) {
+          if ($controller == '' || $action == '') {
+            Debug::logMessage('Activating Route', $route->getUrl(array(), FALSE));
+            Debug::logMessage('Activating Route', "The route '{$route->getName()}' contained an empty controller '{$controller}' and/or action '{$action}'");
+            continue;
+          }
+
+          $controller = $controllerFactory->normaliseControllerName($controller);
+
+          Debug::logMessage('Activating Route', $controller . '::' . $action);
+
+          if (Cmf_Controller_Cache::controllerExists($controller) == FALSE) {
+            Debug::logMessage('Activating Route', "The controller specified '{$controller}' could not be found.");
             continue;
           }
 
@@ -169,10 +184,17 @@ class Cmf_Route_Table {
           if (method_exists($controller, $action) == TRUE) {
             return $route;
           }
+
+          Debug::logMessage('Activating Route', "The action specified '{$action}' could not be found.");
         }
         catch (Exception $ex) {
+          Debug::logMessage('Activating Route', $ex->getMessage());
           continue;
         }
+      }
+      else {
+        Debug::logMessage('Activating Route', $route->getUrl(array(), FALSE));
+        Debug::logMessage('Activating Route', "The route '{$route->getName()}' did not match the URL");
       }
     }
 
